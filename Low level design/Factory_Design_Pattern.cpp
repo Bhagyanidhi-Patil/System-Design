@@ -11,7 +11,26 @@
     2. Factory f;
        f.sendNotification("Email");  
        in this case no need to make Factory class function as static as we are creating factory object and calling function. 
-*/
+            
+       Client (main)
+            |
+            v
+        Factory::sendNotification(type)
+            |
+            v
+        +---------------------------+
+        |        Factory            |
+        | if Email -> EmailNotification
+        | if SMS   -> SMSNotification
+        | if Push  -> PushNotification
+        +---------------------------+
+            |
+            v
+        Notification Object Created
+            |
+            v
+        send()
+ */
 
 #include<iostream>
 using namespace std;
