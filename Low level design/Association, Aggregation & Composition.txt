@@ -1,0 +1,118 @@
+🔍 Defination: 
+
+    1.Association:
+    Association is just a connection between two objects. They can know about each other and interact, but they are independent. 
+    If one object is destroyed, the other continues to exist.
+    Example:
+        • A Student and a Course are connected because a student can take a course, and a course can have many students. But if a student is deleted, the course still exists.
+
+    2.Aggregation:
+    Aggregation is a type of association where one object contains another object, but the contained object can still exist independently. 
+    If the "whole" object is destroyed, the "part" can still exist.
+    Example:
+        • A Department contains Employees, but if the department is deleted, the employees can still exist without the department.
+
+    3.Composition:
+    Composition is a stronger form of aggregation. It means one object owns another, and if the owning object is destroyed, the owned objects are also destroyed. 
+    The "part" can't exist without the "whole."
+    Example:
+	• A House contains Rooms, and if the house is destroyed, the rooms are destroyed too. Rooms can't exist without a house.
+
+-----------------------#########-------------------------------
+🔍 UML Representation:
+
+🔼 1. IS-A → Inheritance (Generalization)
+Dog IS-A Animal
+
+Dog --------▷ Animal  
+(arrow with hollow triangle ▲)
+
+🔗 2. HAS-A → Can be 3 types
+(a) Association (basic)
+A -------- B
+
+👉 A uses B (weakest)
+
+(b) Aggregation (◇)
+A ◇-------- B
+
+👉 A has B (independent)
+
+(c) Composition (◆)
+A ◆-------- B
+
+👉 A owns B (dependent)
+
+-----------------------#########-----------------------------------
+
+🔍 How to Identify Composition,Aggregation and Association from C++ Code ?
+
+✅ 1. Association (—) → “just uses”
+    ✔ Signs:
+        Used as function parameter / local variable
+        Not stored as a member
+        Temporary usage
+    
+    💻 Example:
+        class Engine {};
+
+        class Car {
+        public:
+            void start(Engine e) {   // 👈 just used
+                // use engine
+            }
+        };
+
+    Car does NOT own Engine ,It just uses it temporarily.
+
+🔷 2. Aggregation (◇) → “has but doesn’t own”
+    ✔ Signs:
+        Stored as pointer or reference
+        Created outside the class
+        Can be shared
+    
+    💻 Example:
+        class Engine {};
+
+        class Car {
+        private:
+            Engine* engine;   // 👈 reference
+
+        public:
+            Car(Engine* e) {
+                engine = e;   // external object
+            }
+        };
+
+    Car has Engine ,But does NOT control its lifetime.
+
+🔶 3. Composition (◆) → “owns strongly”
+    ✔ Signs:
+        Stored as object (not pointer)
+        OR
+        Created and destroyed inside class
+    
+    💻 Example 1 (Direct object):
+        class Engine {};
+
+        class Car {
+        private:
+            Engine engine;   // 👈 owned
+        };
+    
+    💻 Example 2 (Pointer but owned):
+        class Car {
+        private:
+            Engine* engine;
+
+        public:
+            Car() {
+                engine = new Engine();  // created inside
+            }
+
+            ~Car() {
+                delete engine;          // destroyed inside
+            }
+        };
+
+    Car fully controls Engine.
