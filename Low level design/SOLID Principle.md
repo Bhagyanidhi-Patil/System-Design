@@ -1,27 +1,37 @@
-S - Single Responsibility Principle (SRP)
+# SOLID Principles
+
+## S - Single Responsibility Principle (SRP)
+
 - A class should have only one reason to change.
-- Example: class `InvoicePrinter` prints invoices; class `InvoiceCalculator` calculates totals.
+- **Example**: class `InvoicePrinter` prints invoices; class `InvoiceCalculator` calculates totals.
 
-O - Open/Closed Principle (OCP)
+## O - Open/Closed Principle (OCP)
+
 - Software entities should be open for extension, closed for modification.
-- Example: `Shape` interface with `draw()`; concrete `Circle`, `Square` extend behavior.
+- **Example**: `Shape` interface with `draw()`; concrete `Circle`, `Square` extend behavior.
 
-L - Liskov Substitution Principle (LSP)
+## L - Liskov Substitution Principle (LSP)
+
 - Derived classes must be usable anywhere base class is expected.
-- Example: `Bird` and `FlyingBird` split; `Penguin` does not inherit `FlyingBird`.
+- **Example**: `Bird` and `FlyingBird` split; `Penguin` does not inherit `FlyingBird`.
 
-I - Interface Segregation Principle (ISP)
+## I - Interface Segregation Principle (ISP)
+
 - Many specific interfaces are better than one fat interface.
-- Example: `IPrinter` and `IScanner` instead of `IMultiFunctionDevice` with unused methods.
+- **Example**: `IPrinter` and `IScanner` instead of `IMultiFunctionDevice` with unused methods.
 
-D - Dependency Inversion Principle (DIP)
+## D - Dependency Inversion Principle (DIP)
+
 - High-level modules should not depend on low-level modules; both should depend on abstractions.
-- Example: `PaymentProcessor` depends on `IPaymentGateway`, not `PaypalGateway` directly.
+- **Example**: `PaymentProcessor` depends on `IPaymentGateway`, not `PaypalGateway` directly.
 
 ---
 
-C++ Example (simple SOLID demo: payment processing):
+## C++ Example
 
+Simple SOLID demo: payment processing
+
+```cpp
 #include <iostream>
 #include <memory>
 
@@ -75,10 +85,12 @@ int main() {
 
     return 0;
 }
+```
 
-// SOLID mapping:
-// - SRP: IPaymentGateway authorizes; PaymentProcessor orchestrates processing.
-// - OCP: add new gateway classes (e.g., `SquareGateway`) without edits to PaymentProcessor.
-// - LSP: any IPaymentGateway derived type can be used by PaymentProcessor.
-// - ISP: IPaymentGateway has a focused single method.
-// - DIP: PaymentProcessor depends on abstraction IPaymentGateway.
+## SOLID Mapping
+
+- **SRP**: `IPaymentGateway` authorizes; `PaymentProcessor` orchestrates processing.
+- **OCP**: add new gateway classes (e.g., `SquareGateway`) without edits to `PaymentProcessor`.
+- **LSP**: any `IPaymentGateway` derived type can be used by `PaymentProcessor`.
+- **ISP**: `IPaymentGateway` has a focused single method.
+- **DIP**: `PaymentProcessor` depends on abstraction `IPaymentGateway`.

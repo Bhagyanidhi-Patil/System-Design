@@ -1,51 +1,64 @@
-🔍 Defination: 
+# Association, Aggregation & Composition
 
-    1.Association:
-    Association is just a connection between two objects. They can know about each other and interact, but they are independent. 
-    If one object is destroyed, the other continues to exist.
-    Example:
-        • A Student and a Course are connected because a student can take a course, and a course can have many students. But if a student is deleted, the course still exists.
+## Definitions
 
-    2.Aggregation:
-    Aggregation is a type of association where one object contains another object, but the contained object can still exist independently. 
-    If the "whole" object is destroyed, the "part" can still exist.
-    Example:
-        • A Department contains Employees, but if the department is deleted, the employees can still exist without the department.
+### 1. Association
 
-    3.Composition:
-    Composition is a stronger form of aggregation. It means one object owns another, and if the owning object is destroyed, the owned objects are also destroyed. 
-    The "part" can't exist without the "whole."
-    Example:
-	• A House contains Rooms, and if the house is destroyed, the rooms are destroyed too. Rooms can't exist without a house.
+Association is just a connection between two objects. They can know about each other and interact, but they are independent. If one object is destroyed, the other continues to exist.
 
------------------------#########-------------------------------
-🔍 UML Representation:
+**Example**: A Student and a Course are connected because a student can take a course, and a course can have many students. But if a student is deleted, the course still exists.
 
-🔼 1. IS-A → Inheritance (Generalization)
+### 2. Aggregation
+
+Aggregation is a type of association where one object contains another object, but the contained object can still exist independently. If the "whole" object is destroyed, the "part" can still exist.
+
+**Example**: A Department contains Employees, but if the department is deleted, the employees can still exist without the department.
+
+### 3. Composition
+
+Composition is a stronger form of aggregation. It means one object owns another, and if the owning object is destroyed, the owned objects are also destroyed. The "part" can't exist without the "whole."
+
+**Example**: A House contains Rooms, and if the house is destroyed, the rooms are destroyed too. Rooms can't exist without a house.
+
+---
+
+## UML Representation
+
+### 1. IS-A → Inheritance (Generalization)
+
+```
 Dog IS-A Animal
 
 Dog --------▷ Animal  
 (arrow with hollow triangle ▲)
+```
 
-🔗 2. HAS-A → Can be 3 types
-(a) Association (basic)
+### 2. HAS-A → Can be 3 types
+
+#### (a) Association (basic)
+
+```
 A -------- B
-
 👉 A uses B (weakest)
+```
 
-(b) Aggregation (◇)
+#### (b) Aggregation (◇)
+
+```
 A ◇-------- B
-
 👉 A has B (independent)
+```
 
-(c) Composition (◆)
+#### (c) Composition (◆)
+
+```
 A ◆-------- B
-
 👉 A owns B (dependent)
+```
 
------------------------#########-----------------------------------
+---
 
-🔍 How to Identify Composition,Aggregation and Association from C++ Code ?
+## How to Identify Composition, Aggregation and Association from C++ Code
 
 ✅ 1. Association (—) → “just uses”
     ✔ Signs:

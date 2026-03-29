@@ -1,18 +1,27 @@
-DRY - Don't Repeat Yourself
+# DRY, YAGNI, KISS Principles
+
+## DRY - Don't Repeat Yourself
+
 - Avoid duplicate code; extract common logic into a single place.
-- Benefits: easier maintenance, fewer bugs.
+- **Benefits**: easier maintenance, fewer bugs.
 
-YAGNI - You Aren't Gonna Need It
+## YAGNI - You Aren't Gonna Need It
+
 - Don't implement features until they are actually required.
-- Benefits: faster delivery, less complexity.
+- **Benefits**: faster delivery, less complexity.
 
-KISS - Keep It Simple, Stupid
+## KISS - Keep It Simple, Stupid
+
 - Prefer simple, straightforward solutions over clever/complex ones.
-- Benefits: easier to read, test, and maintain.
+- **Benefits**: easier to read, test, and maintain.
 
--------
-C++ example (demo: simple sum validation):
+---
 
+## C++ Example
+
+Simple demonstration with sum validation:
+
+```cpp
 #include <iostream>
 using namespace std;
 
@@ -39,5 +48,4 @@ int main() {
     std::cout << "Sum: " << Add(x, y) << "\n";
     return 0;
 }
-
-// Existing inventory example continues below...
+```
