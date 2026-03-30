@@ -7,8 +7,19 @@
 class VehicleFactory {
 public:
     static Vehicle* createVehicle(const std::string& plate, VehicleType type) {
-        // Validation can be added here (non-empty plate etc.)
-        return new Vehicle(plate, type);
+        if (plate.empty()) {
+            return nullptr;
+        }
+
+        if (type == VehicleType::CAR) {
+            return new Car(plate);
+        } else if (type == VehicleType::BIKE) {
+            return new Bike(plate);
+        } else if (type == VehicleType::TRUCK) {
+            return new Truck(plate);
+        }
+
+        return nullptr;
     }
 };
 

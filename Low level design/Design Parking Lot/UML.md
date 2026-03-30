@@ -1,6 +1,6 @@
 # Parking Lot UML Diagram (Updated with Design Patterns)
 
-# Parking Lot UML Diagram (Updated with Design Patterns)
+
 
 ```
 Core Classes:
