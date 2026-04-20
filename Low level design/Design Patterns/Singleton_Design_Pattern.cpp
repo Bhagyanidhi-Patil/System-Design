@@ -130,3 +130,42 @@ int main() {
         When the function (or scope) ends, lock_guard is destroyed
         Its destructor automatically unlocks the mutex
 */
+
+//thread safe code (c++11 onwards)
+//Only local static variables (inside a function) are thread-safe (since C++11)
+
+#include <iostream>
+using namespace std;
+
+class Singleton{
+private:
+    Singleton(){
+        cout<<"Singleton created"<<endl;
+    }
+public:
+    static Singleton& getInstance(){
+        static Singleton instance;   //thread -safe
+        return instance;
+    }
+    void showMessage(){
+        cout<<"Hello from singleton"<<endl;
+    }
+};
+int main() {
+    // Get instance first time
+    Singleton& s1 = Singleton::getInstance();
+    s1.showMessage();
+
+    // Get instance second time
+    Singleton& s2 = Singleton::getInstance();
+    s2.showMessage();
+
+    // Check if both are same
+    if (&s1 == &s2) {
+        cout << "Same instance\n";
+    } else {
+        cout << "Different instances\n";
+    }
+
+    return 0;
+}
