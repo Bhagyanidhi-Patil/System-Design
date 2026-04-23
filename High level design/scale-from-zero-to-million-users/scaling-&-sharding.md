@@ -58,7 +58,7 @@ Sharding spreads the load across multiple machines.
 
 ---
 
-# 🔹 1. Horizontal Sharding (Most common)
+## 🔹 1. Horizontal Sharding (Most common)
 
 Split data by rows — each shard holds some of the rows of a table.
 
@@ -78,7 +78,7 @@ You have a users table with 10 million users.
 
 ---
 
-# 🔹 2. Vertical Sharding
+## 🔹 2. Vertical Sharding
 
 Split data by columns — each shard holds different parts of the data (different tables or columns).
 
@@ -92,6 +92,10 @@ Split data by columns — each shard holds different parts of the data (differen
 
 ### ❌ Disadvantages
 - Some queries may need to join data across shards  
+
+---
+
+<img src="image-7.png" width="500">
 
 ---
 
@@ -124,7 +128,7 @@ If one shard gets too much data or traffic, you may need to:
 
 - Move data between shards  
 - Update shard keys or ranges  
-- Possibly Reshard everything (which is slow and risky)  
+- Possibly reshard everything (which is slow and risky)  
 
 This is called the rebalancing problem.
 
@@ -160,4 +164,15 @@ Multi-shard transactions are tricky:
 ## ❌ 7. Testing & Development Become Harder
 
 In development:
+
 - Simulating a multi-shard system is harder  
+
+---
+
+# 🌍 Real-World Applications
+
+Sharding is commonly used in large-scale applications and databases, including:
+
+- → Web Applications: Social media platforms, e-commerce sites, and any application with millions of users often utilize sharding to handle their vast amounts of user data.  
+- → NoSQL Databases: Many NoSQL databases, like MongoDB and Cassandra, are designed to support sharding natively.  
+- → Distributed Databases: Systems that require high availability and scalability, such as Amazon DynamoDB and Google Cloud Spanner, often implement sharding as part of their architecture.  
