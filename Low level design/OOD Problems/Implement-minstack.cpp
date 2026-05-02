@@ -30,7 +30,7 @@ public:
 
         long long top = st.top();
         st.pop();
-        if(top<minValue){
+        if(top<minValue){  //if top<minValue, which means top is encoded val, so it is minVal , when we pop this, we need to restore old min
             // restore previous minimum
             minValue = 2*minValue - top;
         }
