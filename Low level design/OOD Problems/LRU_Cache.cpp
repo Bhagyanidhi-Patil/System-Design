@@ -16,7 +16,7 @@ Design LRU Cache: Use,
 #include <stdexcept>
 using namespace std;
 
-class Node{
+struct Node{
 public:
     int key,value;
     Node* prev;
