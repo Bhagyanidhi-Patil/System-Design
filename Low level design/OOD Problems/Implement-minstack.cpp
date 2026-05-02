@@ -67,6 +67,16 @@ int main() {
 }
 
 /*
+We can do it using two stack , min stack and main stack. main stack to store normal stack value and min stack to store min value for
+each value of mainstack.But this is not optimal solution.
+Time Complexity (TC) push() → O(1) pop() → O(1) top() → O(1) getMin() → O(1)
+Space Complexity (SC) O(n) Main stack stores n elements ,Min stack may also store up to n elements
+
+Optimal (One Stack + Encoding)
+TC is same
+Space Complexity (SC) O(1) extra space
+👉 Because: Only one stack is used , No additional stack ,Only one extra variable (minEle)
+
 🎯 Why do we encode & decode?
 Because we want all operations in O(1) , AND we don’t want to use extra space (like another stack)
 When you pop minValue, How do you know the previous minimum to store in minValue?
