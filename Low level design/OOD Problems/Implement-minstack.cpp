@@ -43,7 +43,7 @@ public:
         if(top>=minValue)
             return top;
         else
-            return minValue;
+            return minValue;  //if top<minvalue, then it is encoded value, so return minvalue.
     }
 
     int getMin(){
