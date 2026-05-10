@@ -75,6 +75,10 @@ Example:
     dest: [h][e][l][l][o][\0]
 
     Now dest becomes a valid C-string.
+
+    Important* = memcpy does NOT know: “this is an int” “this is a string” “this is an object” ,
+    It only knows: “Copy N bytes from address A to address B” 
+    so, when it copies bytes internally value stored in memory /bytes alsg gets copied
 */
 
 #include <iostream>
