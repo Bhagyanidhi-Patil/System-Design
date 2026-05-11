@@ -13,6 +13,7 @@ private:
     chrono::milliseconds elapsed{0};            //creating a variable named elapsed of type milliseconds, initialized to 0 milliseconds.
     // Tracks whether stopwatch is currently running
     bool running = false;
+    bool stopped = true;
 
 public:
     //start stopwatch from zero
@@ -20,6 +21,7 @@ public:
         elapsed = chrono::milliseconds(0);    //assigning zero milliseconds to the variable elapsed.
         startTime = Clock::now();
         running = true;
+        stopped = false;
     }
 
     //pause stopwatch
@@ -29,11 +31,20 @@ public:
         auto currentDuration = chrono::duration_cast<chrono::milliseconds>(Clock::now() - startTime);
         elapsed+=currentDuration;
         running = false;
+        stopped = false;
     }
 
-    //Resume stopwatch
+/*Resume stopwatch - 
+During pause() we save old elapsed time. And resume is called only if you pause. 
+So during resume() we can safely start from current time.
+Then elapsedMilliseconds() combines: old elapsed time + current running duration  */
+
     void resume(){
         if(running == true)return;
+        if(stopped == true){
+            cout<<"Cannot resume as clock is stopped"<<endl;
+            return;
+        }
 
         startTime = Clock::now();
         running = true;
@@ -42,12 +53,14 @@ public:
     //Stop stopwatch completely
     void stop(){
         pause();
+        stopped = true;
     }
 
     //reset stopwatch
     void reset(){
         elapsed = chrono::milliseconds(0);
         running = false;
+        stopped = false;
     }
 
     //return elapsed time in milliseconds - It returns how much time has passed since the stopwatch started.
@@ -68,7 +81,7 @@ int main(){
     sw.start();
 
     //pause the current thread for 2 seconds.
-    this_thread::sleep_for(chrono::milliseconds(2));
+    this_thread::sleep_for(chrono::seconds(2));
 
     cout<<"Elasped: "<<sw.elaspedMilliseconds()<<" ms\n";
 
