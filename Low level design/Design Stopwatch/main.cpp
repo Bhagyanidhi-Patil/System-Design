@@ -7,10 +7,13 @@ class Stopwatch{
 private:
     using Clock = chrono::steady_clock;    //Clock is another name for std::chrono::steady_clock.
 
-    // Stores time when stopwatch was started/resumed
+    // Stores time when stopwatch was started/resumed , A time_point stores a clock timestamp like: Clock::now()
+    // time_point = "current moment on the clock"
     Clock::time_point startTime;
+
     // Stores already accumulated elapsed time
     chrono::milliseconds elapsed{0};            //creating a variable named elapsed of type milliseconds, initialized to 0 milliseconds.
+    
     // Tracks whether stopwatch is currently running
     bool running = false;
     bool stopped = true;
