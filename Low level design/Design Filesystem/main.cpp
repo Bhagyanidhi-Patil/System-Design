@@ -125,6 +125,23 @@ curr = curr->children[dir]; Move the pointer curr to the child node named dir
 
 --------------------------------------------------------------------------------------------------------------------------------
 
+fs.mkdir("/a/b/c");
+fs.addContentToFile("/a/b/c.txt", "Hello ");
 
+Are we turning c into a file?c is still a directory. But c.txt is a file inside c’s parent directory (b), not inside c.
+mkdir /a/b/c 
+Creates:
+root
+ └── a
+      └── b
+           └── c   (directory)
 
+add file /a/b/c.txt
+
+Final structure
+root
+ └── a
+      └── b
+           ├── c        (directory)
+           └── c.txt    (file)
 */
