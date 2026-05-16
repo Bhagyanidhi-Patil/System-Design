@@ -5,76 +5,151 @@
 
 using namespace std;
 
-struct Node{
-    bool isFile;
-    string content;
-    unordered_map<string,Node*>children;
+struct Node {
 
-    Node(){
+    bool isFile;
+    bool isDirectory;
+
+    string content;
+
+    unordered_map<string, Node*> children;
+
+    Node() {
+
         isFile = false;
+        isDirectory = false;
     }
 };
 
-class FileSystem{
+class FileSystem {
+
 private:
+
     Node* root;
 
-    //split path into parts
-    vector<string>split(const string& path){
-        vector<string>result;
+    // Split path into parts
+    vector<string> split(const string& path) {
+
+        vector<string> result;
+
         stringstream ss(path);
+
         string part;
 
-        while(getline(ss,part,'/')){
-            if(!part.empty()){
+        while (getline(ss, part, '/')) {
+
+            if (!part.empty()) {
                 result.push_back(part);
             }
         }
+
         return result;
     }
 
 public:
-    FileSystem(){
+
+    FileSystem() {
+
         root = new Node();
+
+        root->isDirectory = true;
     }
 
-    // create directory path
-    void mkdir(string path){
-        Node* curr = root;
-        vector<string>parts = split(path);
+    // Create directory path
+    void mkdir(string path) {
 
-        for(auto &dir:parts){
-            if(curr->children.count(dir)==0){
-                curr->children[dir] = new Node();
+        Node* curr = root;
+
+        vector<string> parts = split(path);
+
+        for (auto &dir : parts) {
+
+            // Cannot go inside file
+            if (curr->isFile) {
+
+                cout << "Cannot create directory inside file\n";
+
+                return;
             }
+
+            // Create directory if not exists
+            if (curr->children.count(dir) == 0) {
+
+                curr->children[dir] = new Node();
+
+                curr->children[dir]->isDirectory = true;
+            }
+
             curr = curr->children[dir];
         }
     }
 
-    // add content to file
-    void addContentToFile(string filepath,string content){
-        Node* curr =  root;
-        vector<string>parts = split(filepath);
+    // Add content to file
+    void addContentToFile(string filepath,
+                          string content) {
 
-        for(int i=0;i<parts.size();i++){
+        Node* curr = root;
+
+        vector<string> parts = split(filepath);
+
+        for (int i = 0; i < parts.size(); i++) {
+
             string name = parts[i];
-            if(curr->children.count(name)==0){
+
+            // Cannot traverse inside file
+            if (curr->isFile) {
+
+                cout << "Cannot create inside file\n";
+
+                return;
+            }
+
+            // Create node if not exists
+            if (curr->children.count(name) == 0) {
+
                 curr->children[name] = new Node();
             }
+
             curr = curr->children[name];
         }
+
+        // Directory cannot become file
+        if (curr->isDirectory) {
+
+            cout << "Cannot add content to directory\n";
+
+            return;
+        }
+
         curr->isFile = true;
-        curr->content+=content;
+
+        curr->content += content;
     }
 
-    // read file
-    string readContentFromFile(string filepath){
-        Node* curr = root;
-        vector<string>parts = split(filepath);
+    // Read file content
+    string readContentFromFile(string filepath) {
 
-        for(auto &name : parts){
+        Node* curr = root;
+
+        vector<string> parts = split(filepath);
+
+        for (auto &name : parts) {
+
+            // File path does not exist
+            if (curr->children.count(name) == 0) {
+
+                return "File not found";
+            }
+
             curr = curr->children[name];
         }
+
+        // Not a file
+        if (!curr->isFile) {
+
+            return "Path is not a file";
+        }
+
         return curr->content;
     }
 };
@@ -85,7 +160,7 @@ int main() {
 
     fs.mkdir("/a/b/c");
 
-    fs.addContentToFile("/a/b/c.txt", "Hello ");
+    fs.addContentToFile("/a/b/c", "Hello ");
     fs.addContentToFile("/a/b/c.txt", "World");
 
     cout << fs.readContentFromFile("/a/b/c.txt") << endl;
@@ -94,6 +169,29 @@ int main() {
 }
 
 /*
+each node can represent either:
+a directory
+OR
+a file
+
+isFile == false
+👉 node behaves like a directory
+
+isFile == true
+👉 node behaves like a file
+
+Internally
+Directory node (c)
+    isFile = false
+    children = {...}
+    content = ""
+
+File node (c.txt)
+    isFile = true
+    content = "Hello World"
+    children = {}
+----------------------------------------------------------------------------------------------------------------------------
+
 func : vector<string>split(const string& path){}
 Split a file path like: /a/b/c.txt into individual parts: ["a", "b", "c.txt"]
 
