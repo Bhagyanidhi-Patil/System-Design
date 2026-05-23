@@ -38,7 +38,7 @@ public:
         if(lastPrintedTime.find(key)==lastPrintedTime.end() || timestamp - lastPrintedTime[key]>=timeWindow){
             lastPrintedTime[key] = timestamp;
 
-                cout << "[" << timestamp << "] "<< levelToString(level)<< ": "<< message << endl;
+                cout << "[" << timestamp << "] "<<levelToString(level)<< ": "<< message << endl;
 
                 return true;
         }
