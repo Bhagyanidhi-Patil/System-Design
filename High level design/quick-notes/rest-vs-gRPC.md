@@ -11,7 +11,9 @@ Examples:
 Both solve the same problem, but differently.
 
 ## 1. REST
+REST (Representational State Transfer) is a way for applications to communicate over HTTP using standard methods like GET, POST, PUT, and DELETE.
 
+It works by sending requests to URLs (endpoints) and usually exchanges data in JSON format.
 REST works like a normal website request.
 
 A client sends:
@@ -60,7 +62,9 @@ Each resource has a URL:
 | PATCH  | Update part of resource |
 
 ## 2. gRPC
+gRPC (Google Remote Procedure Call) is a high-performance communication framework used for calling methods between services (in micro services) as if they were local functions.
 
+It uses Protocol Buffers (binary format) and runs on HTTP/2.
 gRPC works differently.
 
 Instead of URLs and JSON, it uses:
