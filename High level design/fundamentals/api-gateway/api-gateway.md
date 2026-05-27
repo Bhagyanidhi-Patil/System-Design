@@ -43,7 +43,35 @@ So, the API works like a messenger between two systems.
 
 # API Gateway
 
-An API Gateway is a system that manages and controls API requests between users and backend services.
+An API Gateway is a single entry point for all client requests in a system with multiple backend services.
+
+Instead of clients calling many services directly, they call the API Gateway first.
+
+### Without API Gateway
+```
+Mobile App
+   |----> User Service
+   |----> Payment Service
+   |----> Order Service
+   |----> Notification Service
+```
+
+### Problem:
+
+client must know all services , it is complex and hard to manage ,security duplicated everywhere.
+
+### With API Gateway
+```
+Mobile App
+      |
+   API Gateway
+   /    |     \
+User  Payment  Order
+Svc     Svc     Svc
+```
+### Now:
+
+client talks to only ONE endpoint and gateway routes requests internally
 
 ---
 
