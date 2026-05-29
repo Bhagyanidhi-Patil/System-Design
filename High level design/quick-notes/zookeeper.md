@@ -305,3 +305,5 @@ ZooKeeper prefers:
 It sacrifices some availability during network partitions.
 
 So ZooKeeper is basically CP in CAP theorem.
+
+![alt text](zookeeper.png)

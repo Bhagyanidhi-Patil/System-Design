@@ -256,7 +256,7 @@ Producer only sends to exchange, which decides which queue(s) receive the messag
 This adds flexibility, loose coupling, and dynamic routing.
 ```
 <p align="center">
-  <img src="image-1.png" alt="alt text" />
+  <img src="rabbitMQ.png" alt="alt text" />
 </p>
 
 ---
@@ -359,5 +359,5 @@ This enables high throughput and parallel consumers.
 ## Consumers and Parallelism
 
 <p align="center">
-  <img src="image.png" alt="alt text" />
+  <img src="kafka.png" alt="alt text" />
 </p>
