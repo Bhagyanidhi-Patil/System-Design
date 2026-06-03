@@ -710,212 +710,268 @@ In MongoDB, one record might look like:
 }
 ```
 
-Everything can be stored together as a document.
+## Why NoSQL is Preferred Over SQL
 
-No fixed table structure required.
+### 1. Simple Key-Value Access Pattern
 
-## Fixed Schema vs Flexible Schema
+URL shortener is essentially a key-value lookup:
 
-### SQL
+```
+key -> value
+```
 
-Before inserting data:
+**Example:**
+```
+abc123 -> https://example.com/long-url
+```
 
+This pattern naturally fits NoSQL stores like:
+- **Redis**
+- **DynamoDB**
+- **Cassandra**
+
+**Query:**
+```
+GET abc123
+
+Returns: https://example.com/long-url
+```
+
+✅ Very fast and simple.
+
+### 2. Massive Read Traffic
+
+**Scenario:**
+- 100 million URLs stored
+- 1 billion redirects/day
+
+**Every redirect requires:**
+- Short code → Long URL lookup
+
+**Why NoSQL excels:**
+- Key-value stores are optimized for this pattern
+- Lookup complexity: **O(1)**
+- Perfect for read-heavy workloads
+
+### 3. Easier Horizontal Scaling
+
+**SQL Scaling (Traditional):**
+
+```
+    Primary
+   /       \
+Replica1   Replica2
+```
+
+- Writes go to primary
+- Eventually primary becomes bottleneck
+
+**NoSQL Scaling (Distributed):**
+
+```
+      Hash
+       |
+ +-----+-----+
+ |     |     |
+Sh1   Sh2   Sh3
+```
+
+**Sharding by short code:**
+- `abc123` → Shard1
+- `xyz999` → Shard2
+
+✅ Adding more shards is usually straightforward
+
+### 4. High Write Throughput
+
+**Scenario:**
+- 10 million new URLs/day
+- Each URL generates: `INSERT` operation
+
+Distributed NoSQL databases are designed for:
+- Huge write volumes
+- Parallel writes across shards
+
+**Examples:**
+- Apache Cassandra
+- Amazon DynamoDB
+
+### 5. Joins Are Not Needed
+
+**SQL Use Case (Complex):**
 ```sql
-CREATE TABLE users(
-    id INT,
-    name VARCHAR(50)
-);
+SELECT *
+FROM users
+JOIN orders
+JOIN payments
+JOIN products
 ```
 
-Now every row must follow this structure.
+This requires:
+- Multiple tables
+- Relational integrity
+- Complex transactions
 
-Valid:
-
-- `1, John`
-- `2, Alice`
-
-### NoSQL
-
-Document 1:
-
-```json
-{
-  "name":"John"
-}
+**URL Shortener Use Case (Simple):**
+```
+ShortCode → LongURL
 ```
 
-Document 2:
+✅ No joins needed
+✅ No relational modeling needed
+✅ Simple direct lookups
 
-```json
-{
-  "name":"Alice",
-  "age":25
-}
+### Why Companies Still Use SQL Sometimes
+
+> "A URL shortener does not require NoSQL. SQL can work very well, especially in early stages. The choice depends on scale."
+
+**SQL Advantages in early stages:**
+- Simpler operational complexity
+- Easier schema modifications
+- ACID guarantees
+- Strong consistency
+
+**Typical progression:**
+1. Start with PostgreSQL (simple, reliable)
+2. As scale increases, shard the database
+3. At billions of URLs, migrate to Cassandra for better horizontal scalability
+
+## Horizontal Scaling Deep Dive
+
+### What is Horizontal Scaling?
+
+**Vertical Scaling (Making one server bigger):**
+
+```
+DB Server
+   |
+1000 QPS (limited by single machine)
 ```
 
-Document 3:
+❌ Problems:
+- Single machine has limits
+- More expensive
+- Bottleneck at max capacity
 
-```json
-{
-  "name":"Bob",
-  "address":"Bangalore"
-}
+**Horizontal Scaling (Adding more servers):**
+
+```
++------+
+| DB1  | 1000 QPS
++------+
+
++------+
+| DB2  | 1000 QPS
++------+
+
++------+
+| DB3  | 1000 QPS
++------+
+
+Total: 3000 QPS
 ```
 
-All are allowed.
+✅ Advantages:
+- Linear scalability
+- Cost-effective
+- No single bottleneck
 
-Very flexible.
+### Why is it Easy in NoSQL?
 
-## Scaling Difference
+**Scenario: URL Data**
 
-This is extremely important for interviews.
-
-### SQL Scaling
-
-Usually:
-
-- `CPU ↑`
-- `RAM ↑`
-- `Disk ↑`
-
-Bigger machine.
-
-Example:
-
-- `8-core server`
-- `↓`
-- `64-core server`
-
-This is called Vertical Scaling.
-
-Scale Up
-
-### NoSQL Scaling
-
-Add more servers.
-
-- Server 1
-- Server 2
-- Server 3
-- Server 4
-
-Data is distributed.
-
-This is called:
-
-- Horizontal Scaling
-- or
-- Scale Out
-
-NoSQL systems are generally designed for this.
-
-## Fixed Schema vs Flexible Schema
-
-### SQL
-
-Before inserting data:
-
-```sql
-CREATE TABLE users(
-    id INT,
-    name VARCHAR(50)
-);
+```
+abc123 → google.com
+xyz456 → amazon.com
+fgh789 → facebook.com
 ```
 
-Now every row must follow this structure.
+**Distribution across shards:**
 
-Valid:
-
-- `1, John`
-- `2, Alice`
-
-### NoSQL
-
-Document 1:
-
-```json
-{
-  "name":"John"
-}
+```
+DB1: abc123 → google.com
+DB2: xyz456 → amazon.com
+DB3: fgh789 → facebook.com
 ```
 
-Document 2:
+**Routing Logic:**
 
-```json
-{
-  "name":"Alice",
-  "age":25
-}
+```
+shortCode = "abc123"
+ShardId = hash(shortCode) % N
+
+Query Shard1 for abc123
 ```
 
-Document 3:
+**Key Characteristics:**
 
-```json
-{
-  "name":"Bob",
-  "address":"Bangalore"
-}
+✅ No relationship exists between records
+✅ Each record is independent
+✅ Very easy to partition
+
+**Internal Note:**
+
+📌 Many NoSQL databases store data in structures that look like tables internally (e.g., Apache Cassandra uses rows and columns).
+
+**Example NoSQL Record Structure:**
+
+```
+Shard1 → user123 → {...}
+Shard2 → user456 → {...}
+Shard3 → user789 → {...}
 ```
 
-All are allowed.
+**Lookup behavior:**
+- A request typically touches only **one shard**
+- No distributed joins needed
+- Fast, localized queries
 
-Very flexible.
+### Why is SQL Harder?
 
+**SQL provides strong guarantees:**
 
-## Persistent Storage vs In-Memory Map
+SQL databases support:
+- ✅ ACID transactions
+- ✅ JOINs across tables
+- ✅ Foreign keys
+- ✅ Strong consistency
 
-In a real URL shortener, the mapping is stored in a database, not just in an in-memory map.
+These features create **dependencies between data**.
 
-### Why not use only a HashMap?
+**Example: SQL Relational Model**
 
-Suppose you store:
-
-- `map.put("abc123", "https://google.com");`
-
-Problems:
-
-### 1. Server Restart
 ```
-    - Server crashes
-    - ↓
-    - Memory cleared
-    - ↓
-    - All URLs lost
-```
-    Not acceptable.
+Users Table
+┌─────────┐
+│ user_id │
+├─────────┤
+│    1    │
+│    2    │
+└─────────┘
 
-### 2. Multiple Servers
-
-In production:
-
-```text
-Load Balancer
-     |
-  ----------
-  |        |
-Server1  Server2
+Orders Table
+┌─────────┬─────────┐
+│order_id │ user_id │
+├─────────┼─────────┤
+│   101   │    1    │
+│   102   │    2    │
+└─────────┴─────────┘
 ```
 
-If the URL is stored only in Server1's memory:
+**Dependency:** Orders depend on Users
 
-- `abc123 -> google.com`
+**When scaling across machines:**
 
-and the request reaches Server2:
-
-```text
-Server2
-↓
-No mapping found
+```
+Machine1 → Users Table
+Machine2 → Orders Table
 ```
 
-Failure.
+Challenges:
+- ❌ Database must coordinate between machines
+- ❌ Distributed transactions are complex
+- ❌ Maintaining consistency is harder
+- ❌ Scaling becomes significantly more difficult
 
-### 3. Billions of URLs
-
-Suppose:
-
-- `10 billion URLs`
-
-Keeping everything in RAM is extremely expensive.
-
-Databases are designed for persistent storage.
+**Conclusion:**
+SQL's relational guarantees are powerful but make horizontal scaling complex. NoSQL's simpler model (key-value, no joins) makes sharding and scaling much more straightforward.
