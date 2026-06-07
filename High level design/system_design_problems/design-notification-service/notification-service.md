@@ -1731,3 +1731,48 @@ Duplicate Key Error
 - Already processed
 
 and exits.
+
+---
+
+### How do you handle millions of requests?
+- If the system receives millions of requests, I would scale it horizontally at every layer. First, place a Load Balancer in front of multiple Notification API instances to distribute incoming traffic. Then use a message queue like Kafka to absorb traffic spikes and decouple request ingestion from processing. Finally, scale the workers independently based on queue length and throughput requirements.
+
+**Simple flow:**
+```
+                 Load Balancer
+                        |
+          --------------------------------
+          |              |              |
+          v              v              v
+
+     Notification   Notification   Notification
+       API-1          API-2          API-3
+
+          |              |              |
+          --------------------------------
+                        |
+                        v
+
+          --------------------------------
+          |              |              |
+          v              v              v
+
+   Notification    Notification    Notification
+    Service-1       Service-2       Service-3
+
+                        |
+                        v
+                      Kafka
+```
+Kafka is designed for very high throughput and can handle millions of messages per second when properly configured.
+#### Why both Load Balancer and Queue?
+
+Load Balancer
+
+- Handles high incoming request volume.
+- Distributes requests across many API servers.
+
+Queue
+
+- Buffers requests when traffic spikes.
+- Prevents downstream systems (email, SMS, push providers) from getting overwhelmed.
