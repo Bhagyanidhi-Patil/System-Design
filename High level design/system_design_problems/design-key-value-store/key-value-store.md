@@ -1,6 +1,6 @@
 ﻿# Problem Statement
 
-Design a distributed key value store / system that supports the following operation (key value store - NOSQL DB):
+Design a **distributed key value store / system** that supports the following operation (key value store - NOSQL DB):
 
 - `PUT(key, value)`
 - `GET(key)`
