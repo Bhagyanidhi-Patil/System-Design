@@ -478,11 +478,11 @@ Suppose:
 `GET(user:123)`
 
 Step 1: Find partition
-
+```
 `hash("user:123")`
       ↓
 `Partition 5`
-
+```
 Same as write.
 
 Step 2: Query replicas
@@ -534,7 +534,7 @@ and:
 
 Then a read request must get responses from at least 2 replicas before returning.
 
-##### Example 1: All replicas agree
+#### Example 1: All replicas agree
 
 - A -> John
 - B -> John
@@ -548,7 +548,7 @@ Return:
 
 `John`
 
-##### Example 2: One replica is stale
+#### Example 2: One replica is stale
 
 A write updated the value to "Johnny" but Node C hasn't received it yet.
 
@@ -620,7 +620,15 @@ Then:
 
 This tells us:
 
-Every successful read quorum will overlap with every successful write quorum by at least one replica.
+- Every successful read quorum will overlap with every successful write quorum by at least one replica.
+- The read quorum and write quorum must overlap by at least one replica.
+- So the read operation is guaranteed to contact at least one replica that saw the latest successful write.
+- If:
+
+`R + W < N`
+
+- then a read quorum and write quorum can be completely disjoint, meaning the read may never contact a replica that received the latest write.
+---
 
 ### Why overlap matters
 
@@ -651,6 +659,8 @@ Every read set contains either A or B.
 And A/B have the latest write.
 
 So the read will always see the latest data.
+
+---
 
 ### Interview Diagram
 
@@ -1423,9 +1433,11 @@ They tell you:
 
 `"These two writes happened independently (concurrently), so I cannot determine a winner automatically."`
 
-writes using an LSM Tree (Log Structured Merge Tree).
+---
 
-## Why not write directly to disk?
+## Writes using an LSM Tree (Log Structured Merge Tree).
+
+### Why not write directly to disk?
 
 Suppose every write updates a disk file:
 
@@ -1585,39 +1597,42 @@ Looking for:
 Need to check:
 
 - MemTable
-- + many SSTables
+- many SSTables
 
 Potentially expensive.
 
 ## Bloom Filter
 
-A Bloom Filter is a tiny in-memory structure.
+A Bloom Filter is a space-efficient **probabilistic data structure** used to quickly answer:
 
-Question:
+`"Is this key definitely not present, or might it be present?"`
+- It's heavily used in distributed key-value stores like Apache Cassandra, RocksDB, and LevelDB to avoid unnecessary disk reads.
 
-Does user:999 exist in SSTable 4?
+**Question:**
+
+**Does user:999 exist in SSTable 4?**
 
 Possible answers:
-
+```
 - Definitely Not
   - No
-
+```
 100% guaranteed.
 
 Skip reading SSTable 4.
-
+```
 - Maybe Yes
   - Maybe
-
+```
 Need to check SSTable 4.
 
 ### Important Property
 
 Bloom filters can have:
-
+```
 - False Positives
-
-Example:
+```
+**Example:**
 
 Bloom Filter says:
 
@@ -1630,9 +1645,9 @@ That's okay.
 We just do an extra disk lookup.
 
 Bloom filters never have:
-
+```
 - False Negatives
-
+```
 They will never say:
 
 `Definitely not present`
@@ -1666,6 +1681,144 @@ Only open:
 - SSTable5
 
 Huge performance gain.
+
+---
+
+## Neat Flow of Write and Read on Nodes
+
+In most distributed key-value store discussions, a node is essentially a **server running the database software**.
+
+Think of it like this:
+
+```text
+Cluster
+│
+├── Node A (Database Instance)
+├── Node B (Database Instance)
+├── Node C (Database Instance)
+└── Node D (Database Instance)
+```
+
+Each node has:
+
+- CPU
+- Memory
+- Disk
+- Database Software
+
+For example, in a Cassandra cluster:
+
+- Node A = Cassandra process + local disk
+- Node B = Cassandra process + local disk
+- Node C = Cassandra process + local disk
+
+### What is database ?
+A database is a software program.
+
+Examples:
+```
+MySQL
+PostgreSQL
+MongoDB
+Apache Cassandra
+```
+Just like:
+```
+Chrome = software
+VS Code = software
+MySQL = software
+```
+- The database runs in memory (RAM + CPU) as a process.
+- Its data is stored on disk.
+- The database software's job is to read and write data to disk (and also manage memory, indexes, caching, transactions, etc.).
+- The data is stored on disk, and the database software reads it from disk and presents it to applications/users.
+
+### What happens during a Write?
+
+Suppose:
+
+`PUT("user123", "John")`
+
+#### Step 1: Find the responsible node
+
+Using consistent hashing:
+```
+`hash(user123)`
+    ↓
+`Node B`
+```
+Node B becomes the primary/coordinator.
+
+#### Step 2: Replication
+
+Assume:
+
+- `RF = 3`
+
+Then data is stored on:
+
+- Node B (Primary)
+- Node C (Replica)
+- Node D (Replica)
+
+#### On each node
+
+The node performs its local database write:
+
+```text
+Write Ahead Log (WAL)
+        ↓
+MemTable
+        ↓
+SSTable
+```
+
+So yes, every replica node executes its own write path locally.
+
+#### Write Flow Diagram
+
+```text
+Client
+   ↓
+Coordinator (B)
+   ↓
+B writes locally
+C writes locally
+D writes locally
+```
+
+### What happens during a Read?
+
+Suppose:
+
+`GET("user123")`
+
+Coordinator determines replicas:
+
+- B
+- C
+- D
+
+Assume:
+
+- `R = 2`
+
+It queries two replicas.
+
+- Read from B
+- Read from C
+
+Each node executes its own local read:
+
+- Check MemTable
+- Check Bloom Filter
+- Check SSTables
+- Return value
+
+Coordinator compares versions and returns the newest value.
+
+
+
 
 ## Interview-Level Complete Design
 
