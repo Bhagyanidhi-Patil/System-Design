@@ -993,6 +993,7 @@ The next request fetches fresh data from the database and repopulates the cache.
 ---
 
 ### Common Cache Invalidation Strategies :
+### Question : How do you keep cache and DB consistent?
 
 ### 1. TTL (Time-To-Live)
 
