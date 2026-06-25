@@ -878,3 +878,289 @@ Only requests with the **same idempotency key** and the **same request payload**
    * If the hashes do not match, reject the request with **HTTP 400 Bad Request**, since the same idempotency key is being reused with a different payload.
 
 ---
+
+## Idempotency in Distributed Systems
+
+### Why Is a Shared Store Needed?
+
+Using idempotency on a **single server** is straightforward because all requests are handled by the same application instance.
+
+However, in a production environment, applications are usually deployed across multiple servers behind a load balancer.
+
+```text
+               Load Balancer
+                     │
+          ┌──────────┴──────────┐
+          │                     │
+      Server A             Server B
+```
+
+Suppose the first request is routed to **Server A** and the retry request is routed to **Server B**.
+
+If each server stores idempotency keys only in its local memory:
+
+* Server A processes the first request.
+* Server B has no knowledge of the previous request.
+* Server B processes the retry again.
+
+This results in **duplicate processing**, defeating the purpose of idempotency.
+
+Therefore, all application instances must use a **shared storage** that is accessible from every server.
+
+```text
+               Load Balancer
+                     │
+          ┌──────────┴──────────┐
+          │                     │
+      Server A             Server B
+          │                     │
+          └──────────┬──────────┘
+                     │
+             Shared Storage
+         (Redis / SQL Database)
+```
+
+Every server first checks the shared storage before processing the request.
+
+---
+
+### Storage Options
+
+The two most common choices are **Redis** and a **SQL Database**.
+
+### Option 1: Redis
+
+Redis is the most commonly used storage for idempotency keys.
+
+```text
+Client
+    │
+Idempotency Key
+    │
+    ▼
+ Redis
+```
+
+### Benefits
+
+* Extremely fast in-memory lookups.
+* Very low latency.
+* Built-in support for TTL (Time-To-Live).
+* Ideal for high-throughput applications.
+
+Redis is commonly used for APIs where very fast request processing is required.
+
+---
+
+### Option 2: SQL Database
+
+Examples:
+
+* PostgreSQL
+* MySQL
+
+### Benefits
+
+* Strong consistency.
+* ACID transaction guarantees.
+* Durable storage.
+* Suitable for financial systems.
+
+For payment systems, many companies prefer storing idempotency records in the same database transaction as the payment record to ensure maximum consistency.
+
+---
+
+### Using Redis to Prevent Concurrent Processing
+
+Redis provides the **SETNX (Set if Not Exists)** command.
+
+Example:
+
+```text
+SETNX abc123 IN_PROGRESS
+```
+
+The command means:
+
+> Store the key only if it does not already exist.
+
+---
+
+### How SETNX Works
+
+Suppose two identical requests arrive simultaneously.
+
+#### Request A
+
+```text
+SETNX abc123 IN_PROGRESS
+
+Result: SUCCESS
+```
+
+Since the key does not exist, Redis stores it successfully.
+
+---
+
+#### Request B
+
+```text
+SETNX abc123 IN_PROGRESS
+
+Result: FAIL
+```
+
+Because the key already exists, Redis rejects the second request.
+
+Therefore:
+
+* Request A continues processing.
+* Request B immediately knows another request is already processing the same operation.
+
+Only **one request** is allowed to execute the business logic.
+
+---
+
+### After Successful Processing
+
+Once payment processing completes, update the stored value.
+
+```text
+abc123
+   │
+Status = SUCCESS
+Response = {...}
+```
+
+Future retry requests simply read this stored response instead of executing the payment again.
+
+---
+
+### Expiration Strategy (TTL)
+
+An important interview question is:
+
+> **Should idempotency keys be stored forever?**
+
+The answer is **No**.
+
+If keys are never removed, the storage keeps growing indefinitely, consuming memory or database space.
+
+Therefore, idempotency records should have a **Time-To-Live (TTL)**.
+
+---
+
+### Typical TTL Values
+
+| Operation        | Recommended TTL |
+| ---------------- | --------------- |
+| Payments         | 24–48 hours     |
+| Orders           | 24 hours        |
+| Wallet Transfers | 7 days          |
+
+The TTL depends on the business requirements and how long clients are expected to retry requests.
+
+---
+
+### Redis Example
+
+Redis provides the **EXPIRE** command.
+
+```text
+EXPIRE abc123 86400
+```
+
+Here:
+
+* **86400 seconds = 24 hours**
+
+After 24 hours, Redis automatically removes the idempotency key.
+
+This keeps the storage clean and prevents unnecessary memory usage.
+
+---
+
+### Failure Scenario
+
+Consider the following situation.
+
+The server receives a payment request.
+
+It inserts the idempotency key into the database.
+
+```text
+abc123
+
+Status = IN_PROGRESS
+```
+
+Before payment processing completes, the server crashes.
+
+```text
+Insert Key
+      │
+Status = IN_PROGRESS
+      │
+Server Crash ❌
+```
+
+Now the client retries the request.
+
+The retry checks the database and finds:
+
+```text
+abc123
+
+Status = IN_PROGRESS
+```
+
+The problem is that this request may remain in the **IN_PROGRESS** state forever.
+
+Since the original server has crashed, no one will ever update the status to **SUCCESS** or **FAILED**.
+
+Every future retry will continue seeing **IN_PROGRESS**, causing the request to become permanently blocked.
+
+---
+
+### Solution: Detect Stale Requests
+
+To solve this problem, store the timestamp when the request enters the **IN_PROGRESS** state.
+
+Example:
+
+```text
+Status = IN_PROGRESS
+
+created_at = 10:00 AM
+```
+
+Whenever another request arrives, calculate:
+
+```text
+Current Time - created_at
+```
+
+If the elapsed time exceeds a predefined timeout, assume that the original request has failed.
+
+Example:
+
+```text
+Current Time = 10:06 AM
+
+created_at = 10:00 AM
+
+Elapsed Time = 6 minutes
+```
+
+If the timeout is configured as **5 minutes**, the request is considered **stale**.
+
+The server can then:
+
+* Mark the previous request as expired or failed.
+* Retry processing safely.
+* Update the idempotency record with the new result.
+
+This prevents requests from remaining stuck in the **IN_PROGRESS** state forever.
+
+---
+
