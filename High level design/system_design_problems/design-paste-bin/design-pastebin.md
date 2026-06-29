@@ -454,7 +454,14 @@ Paste Service
 Metadata DB
 ```
 
-Redis is an **in-memory cache**, making it much faster than querying a database.
+- Redis is an **in-memory cache**, making it much faster than querying a database.
+- ***Redis is an in-memory cache, which means it stores data primarily in RAM (Random Access Memory) instead of on disk.***
+
+#### **What does "in-memory" mean?**
+- Normally, databases like PostgreSQL or MySQL store data on hard disks or SSDs.
+- Reading data from disk is relatively slow because the system has to access physical storage.
+- Redis stores data in RAM.
+- Since RAM is much faster than disks, Redis can return data in microseconds or low milliseconds.
 
 Approximate latency:
 
@@ -619,13 +626,34 @@ Databases are optimized for structured metadata, not large files.
 
 ### 6. Distributed Object Storage
 
-Object Storage stores the **actual paste content**.
+- Object Storage stores the **actual paste content**.
+- Object Storage is a storage system designed to store large files (objects) such as images, videos, PDFs, backups, logs, and large text files. Instead of storing data in rows (like a database) or folders/files (like a traditional file system), it stores each file as an object.
+
+#### What is an Object?
+
+An object consists of three parts:
+
+- Data – The actual file.
+- Metadata – Information about the file (size, creation time, owner, etc.).
+- Unique Identifier (Object Key) – Used to retrieve the object.
 
 Examples:
 
 * Amazon S3
 * HDFS
 * Azure Blob Storage
+```
+object storage does NOT necessarily mean cloud storage. Cloud providers offer object storage services, but you can also run object storage on your own servers.
+
+Object storage is a type of storage architecture
+
+It defines how data is stored, not where it is stored.
+
+It can be:
+
+✅ Cloud-hosted
+✅ On-premises (your own data center)
+```
 
 ### Why Object Storage?
 
