@@ -7,26 +7,26 @@ Here each value which goes in cache has time to live, and it gets expired after 
 key and value are in string to keep it simple.
 */
 
-#include <iostream>
+#include<iostream>
 #include <unordered_map>
 #include <thread>
 #include <chrono>
 using namespace std;
 
 struct Node{
-    string key;
-    string value;
-    chrono::steady_clock::time_point expiryTime;
-    Node* next;
+    int key;
+    int value;
     Node* prev;
+    Node* next;
+    chrono::steady_clock::time_point expiryTime;
 
-    Node(string k,string v,chrono::steady_clock::time_point exp)
-    :key(k),value(v),expiryTime(exp),prev(NULL),next(NULL){}
+    Node(int k,int v,chrono::steady_clock::time_point exp):
+    key(k),value(v),next(nullptr),prev(nullptr),expiryTime(exp){}
 };
 
 class LRUCache{
 private:
-    unordered_map<string,Node*>cache;
+    unordered_map<int,Node*>cache;
     int capacity;
     Node* head;
     Node* tail;
@@ -39,59 +39,61 @@ private:
     void insertFront(Node* node){
         node->next = head->next;
         node->prev = head;
-        head->next->prev = node;
+        node->next->prev = node;
         head->next = node;
-    }
-
-    void moveToFront(Node* node){
-        removeNode(node);
-        insertFront(node);
-    }
-
-    void deleteNode(Node* node){
-        removeNode(node);
-        cache.erase(node->key);
-        delete node;
     }
 
     bool isExpired(Node* node){
         return chrono::steady_clock::now()>=node->expiryTime;
     }
-
 public:
-    LRUCache(int cap):capacity(cap){
-        head = new Node("","",chrono::steady_clock::now());
-        tail = new Node("","",chrono::steady_clock::now());
+    LRUCache(int cap){
+        capacity = cap;
+        head = new Node(0,0,chrono::steady_clock::now());
+        tail = new Node(0,0,chrono::steady_clock::now());
         head->next = tail;
         tail->prev = head;
     }
 
-    string get(string key){
-        if(cache.find(key)==cache.end()){
-            return "null";
+    ~LRUCache(){
+        Node* curr = head;
+        while(curr!=NULL){
+            Node* next = curr->next;
+            delete curr;
+            curr = next;
         }
+    }
+    
+    int get(int key){
+        if(cache.find(key)==cache.end())return -1;
         Node* node = cache[key];
-        if(isExpired(node)){
-            deleteNode(node);
-            return "null";
+        if(isExpired(node)==true){
+            removeNode(node);
+            cache.erase(key);
+            delete node;
+            return -1;
         }
-        moveToFront(node);
+        removeNode(node);
+        insertFront(node);
         return node->value;
     }
 
-    void put(string key,string value,int ttlseconds){
-        auto expiry = chrono::steady_clock::now()+chrono::seconds(ttlseconds);
+    void put(int key,int value,chrono::steady_clock::duration ttlsecond){
+        auto expiry = chrono::steady_clock::now()+ttlsecond;
 
         if(cache.find(key)!=cache.end()){
             Node* node = cache[key];
             node->value = value;
             node->expiryTime = expiry;
-            moveToFront(node);
+            removeNode(node);
+            insertFront(node);
             return;
         }
         if(cache.size()>=capacity){
-            Node* lru_node = tail->prev;
-            deleteNode(lru_node);
+            Node* lrunode = tail->prev;
+            removeNode(lrunode);
+            cache.erase(lrunode->key);
+            delete lrunode;
         }
         Node* newnode = new Node(key,value,expiry);
         cache[key] = newnode;
@@ -99,19 +101,17 @@ public:
     }
 };
 
-int main() {
+int main(){
 
     LRUCache cache(2);
 
-    cache.put("a", "apple", 5);
+    cache.put(1,100,chrono::seconds(5));
 
-    cout << cache.get("a") << endl;
+    cout<<cache.get(1)<<endl;
 
     this_thread::sleep_for(chrono::seconds(6));
 
-    cout << cache.get("a") << endl;
-
-    return 0;
+    cout<<cache.get(1)<<endl;
 }
 
 /*
