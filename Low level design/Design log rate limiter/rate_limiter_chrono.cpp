@@ -1,89 +1,77 @@
 #include <iostream>
-#include <unordered_map>
 #include <chrono>
-#include <thread>
+#include <unordered_map>
 #include <string>
+#include <thread>
 using namespace std;
 
-enum Loglevel{
+enum logLevel{
     INFO,
-    DEBUG,
+    ERROR,
     WARN,
-    ERROR
+    DEBUG
 };
 
-class LoggerRateLimiter{
+class logLimiter{
 private:
-    unordered_map<string,chrono::steady_clock::time_point>lastPrintedTime;
-    // chrono::seconds timeWindow;
-    chrono::steady_clock::duration timeWindow;
+    unordered_map<string,chrono::steady_clock::time_point>lastPrinted;
+    chrono::steady_clock::duration timewindow;
 
-    //helper : create composite key
-    string makeKey(Loglevel level,const string& message)const{
+    string makeKey(logLevel level,const string& message){
         return to_string(level)+"|"+message;
     }
 
-    string levelToString(Loglevel level){
+    string leveltostring(logLevel level){
         switch(level){
             case INFO: return "INFO";
             case DEBUG: return "DEBUG";
-            case WARN: return "WARN";
-            case ERROR: return "ERROR";
-            default: return "UNKOWN";
+            case WARN : return "WARN";
+            case ERROR : return "ERROR";
+            default: return "UNKNOWN";
         }
     }
-public:
-    LoggerRateLimiter(int window):timeWindow(window){}
 
-    bool shouldPrintMessage(Loglevel level,const string& message){
+public:
+    logLimiter(chrono::steady_clock::duration window):timewindow(window){}
+
+    bool printMessage(logLevel level,const string& message){
         auto now = chrono::steady_clock::now();
         string key = makeKey(level,message);
 
-        // First occurrence
-        if (lastPrintedTime.find(key) == lastPrintedTime.end()) {
-            lastPrintedTime[key] = now;
-
-            cout << "[" << levelToString(level) << "] "
+        if(lastPrinted.find(key)==lastPrinted.end()){
+            lastPrinted[key] = now;
+            cout << "[" << leveltostring(level) << "] "
                  << message << endl;
 
             return true;
         }
 
-        auto elapsed = chrono::duration_cast<chrono::seconds>(now - lastPrintedTime[key]);
-
-        // Print only if time window passed
-        if (elapsed >= timeWindow) {
-
-            lastPrintedTime[key] = now;
-
-            cout << "[" << levelToString(level) << "] "
+        auto elapsed = chrono::duration_cast<chrono::seconds>(now-lastPrinted[key]);
+        if(elapsed>=timewindow){
+            lastPrinted[key] = now;
+            cout << "[" << leveltostring(level) << "] "
                  << message << endl;
 
             return true;
         }
-
-        // Suppressed log
-        cout << "[SUPPRESSED] "
-             << message << endl;
-
         return false;
     }
 };
 
 int main() {
-    LoggerRateLimiter logger(5);
+    logLimiter logger(chrono::seconds(5));
 
-    logger.shouldPrintMessage(INFO, "Service started");
+    logger.printMessage(INFO, "Service started");
 
     this_thread::sleep_for(chrono::seconds(2));
 
-    logger.shouldPrintMessage(INFO, "Service started");
+    logger.printMessage(INFO, "Service started");
 
     this_thread::sleep_for(chrono::seconds(4));
 
-    logger.shouldPrintMessage(INFO, "Service started");
+    logger.printMessage(INFO, "Service started");
 
-    logger.shouldPrintMessage(ERROR, "Database failed");
+    logger.printMessage(ERROR, "Database failed");
 
     return 0;
 }
