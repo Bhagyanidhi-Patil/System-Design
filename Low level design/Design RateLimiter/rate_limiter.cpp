@@ -32,21 +32,42 @@ public:
         windowSize = chrono::seconds(windowSec);
     }
 
-    bool allowRequest(const string& userId) override{
-        lock_guard<mutex>lock(mtx);
-        auto now = chrono::steady_clock::now();
-        userInfo &user = users[userId];
-        auto elapsed = chrono::duration_cast<chrono::seconds>(now-user.windowStart);
-        
-        if(elapsed>=windowSize){
-            user.windowStart = now;
-            user.requestCount = 0;
-        }   
+    bool allowRequest(const string& userId)
+    {
+        lock_guard<mutex> lock(mtx);
 
-        if(user.requestCount<maxRequests){
+        auto now = chrono::steady_clock::now();
+
+        auto it = users.find(userId);
+
+        // First request from this user
+        if (it == users.end())
+        {
+            userInfo newUser;
+            newUser.requestCount = 1;
+            newUser.windowStart = now;
+
+            users[userId] = newUser;
+            return true;
+        }
+
+        userInfo &user = it->second;
+
+        auto elapsed = chrono::duration_cast<chrono::seconds>(now - user.windowStart);
+
+        if (elapsed >= windowSize)
+        {
+            user.windowStart = now;
+            user.requestCount = 1;   // Current request is counted
+            return true;
+        }
+
+        if (user.requestCount < maxRequests)
+        {
             user.requestCount++;
             return true;
         }
+
         return false;
     }
 };
