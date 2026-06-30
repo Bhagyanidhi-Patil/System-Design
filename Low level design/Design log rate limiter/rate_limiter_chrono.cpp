@@ -15,7 +15,8 @@ enum Loglevel{
 class LoggerRateLimiter{
 private:
     unordered_map<string,chrono::steady_clock::time_point>lastPrintedTime;
-    chrono::seconds timeWindow;
+    // chrono::seconds timeWindow;
+    chrono::steady_clock::duration timewindow;
 
     //helper : create composite key
     string makeKey(Loglevel level,const string& message)const{
