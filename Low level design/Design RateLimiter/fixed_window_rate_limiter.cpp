@@ -32,7 +32,7 @@ public:
         windowSize = chrono::seconds(windowSec);
     }
 
-    bool allowRequest(const string& userId)
+    bool allowRequest(const string& userId) override
     {
         lock_guard<mutex> lock(mtx);
 
