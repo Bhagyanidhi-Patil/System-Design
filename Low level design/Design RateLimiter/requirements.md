@@ -44,7 +44,7 @@ Assume:
 
 ---
 
-#### Fixed Window Algorithm
+#### 1. Fixed Window Algorithm
 
 Suppose
 ```
@@ -171,7 +171,7 @@ unordered_map<string, UserInfo> ipAddresses;
 where the **key** is the **client's IP.**
 
 ---
-#### Sliding Window Log
+#### 2. Sliding Window Log
 ##### Idea
 
 Instead of storing only
@@ -240,3 +240,122 @@ unordered_map<
 ```
 
 ---
+
+### 3. Token bucket
+Suppose:
+```
+Bucket Capacity = 5 tokens
+Refill Rate = 1 token/second
+```
+
+Initially:
+
+`Bucket = 5 tokens`
+
+`Every request consumes 1 token.`
+
+**Example:**
+
+Time = 0
+
+Bucket = 5
+```
+Request 1 ✔ Bucket = 4
+Request 2 ✔ Bucket = 3
+Request 3 ✔ Bucket = 2
+Request 4 ✔ Bucket = 1
+Request 5 ✔ Bucket = 0
+Request 6 ✘ No tokens
+```
+Now wait 3 seconds.
+
+Bucket = 3 tokens
+
+Three more requests can be accepted.
+
+#### What information should we store?
+
+For each user we only need
+```
+struct UserInfo
+{
+    double tokens;
+    chrono::steady_clock::time_point lastRefillTime;
+};
+```
+Notice
+
+We don't store every request.
+
+Only
+```
+Current tokens
+Last refill time
+```
+
+#### Case 1: Per User (Most Common)
+
+Suppose the requirement is:
+
+`Every user can make 100 requests/minute.`
+
+Then every user has their own bucket.
+```
+Alice
+Bucket
+5 tokens
+
+Bob
+Bucket
+5 tokens
+
+Charlie
+Bucket
+5 tokens
+```
+Hence we use
+
+`unordered_map<string, UserInfo> users;`
+
+where
+```
+UserInfo
+{
+    tokens
+    lastRefillTime
+}
+```
+This is the implementation I gave you.
+
+#### Case 2: Global Token Bucket
+
+Suppose the requirement is:
+```
+Entire server can process only 1000 requests/sec.
+```
+Now there is only one bucket.
+```
+                Server
+
+                 Bucket
+
+             1000 Tokens
+
+        Alice
+        Bob
+        Charlie
+        David
+
+          All share it
+```
+`No map is needed.`
+
+Just
+```
+double tokens;
+
+chrono::steady_clock::time_point lastRefillTime;
+```
+inside the class.
+
+Every request consumes from the same bucket.
