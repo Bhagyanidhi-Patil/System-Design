@@ -170,6 +170,8 @@ std::move is one of the most important concepts in modern C++.
 
 Simple Definition
 std::move transfers ownership of an object instead of copying it.
+Copy duplicates resources, whereas move transfers ownership of resources.
+Moving is often much faster and is required for types like std::unique_ptr.
 ---
 Example without std::move
 string s1 = "Hello";
@@ -182,6 +184,14 @@ s2 -----> "Hello"
 This is a copy.
 
 Both objects exist independently.
+
+This means:
+    New memory allocation
+    Copy every character
+    More CPU time
+    More memory usage
+
+For small objects it's okay, but for large objects it's expensive.
 ---
 
 Example with std::move
@@ -269,4 +279,13 @@ email --------> nullptr
 service.strategy -----> EmailNotification
 
 The ownership has moved.
+
+---
+Why is std::move preferred over copy?
+
+You can answer:
+"Copy creates a new object by duplicating resources, which can be expensive for large objects because it requires additional 
+memory allocation and data copying. std::move transfers ownership of the existing resources instead, avoiding unnecessary 
+opies and improving performance. Some types like std::unique_ptr cannot be copied at all because they enforce exclusive ownership, 
+so moving is the only valid way to transfer ownership."
 */
