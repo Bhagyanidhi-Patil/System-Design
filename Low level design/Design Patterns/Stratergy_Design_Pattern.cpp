@@ -96,7 +96,7 @@ int main() {
     return 0;
 }
 
-or
+//or
 
 //Client code
 int main() {
