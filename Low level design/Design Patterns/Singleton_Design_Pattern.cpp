@@ -169,3 +169,129 @@ int main() {
 
     return 0;
 }
+/*
+Since C++11, the language guarantees that initialization of a function-local static variable is atomic and synchronized.
+The compiler/runtime ensures that only one thread performs the initialization, while all other threads wait until it completes.
+
+Memory Timeline: 
+
+Initially ,No Singleton object
+
+Thread 1
+Creates Singleton
+
+Static Memory
++-------------------+
+| Singleton Object  |
++-------------------+
+
+Thread 2
+Object already exists
+Return same object
+
+Why is this guaranteed?
+Because the C++11 standard says:
+    Initialization of block-scope static variables is performed exactly once, even in the presence of multiple threads.
+    The compiler automatically generates synchronization code (similar to using a mutex or std::call_once) around the local variable initialization.
+    You don't write that synchronization yourself.
+---
+static Singleton instance; simply means:
+
+only one copy of the variable/object exists,
+it has static storage duration (lives for the lifetime of the program).
+
+---
+Approach 1: Modern C++11 (Meyers Singleton)
+
+static Singleton& getInstance() {
+    static Singleton instance;
+    return instance;
+}
+
+Here we create an actual object:
+static Singleton instance;
+
+Memory:
+
+Static Memory
++----------------------+
+| Singleton instance   |
++----------------------+
+
+    The object is stored in static storage.
+    It is automatically created the first time getInstance() is called.
+    It is automatically destroyed when the program exits.
+    No new or delete is needed.
+
+So we return a reference:
+    return instance;
+----
+Approach 2: Older Singleton
+
+class Singleton {
+private:
+    static Singleton* instance;
+};
+
+Notice this is only a pointer.
+
+Initially:
+
+instance
+   |
+   v
+ nullptr
+
+When getInstance() is called:
+
+if(instance == nullptr)
+    instance = new Singleton();
+
+Now:
+
+Static Memory
+
+instance
+   |
+   v
+
+Heap
++------------------+
+| Singleton Object |
++------------------+
+
+The object is created on the heap.
+
+----
+
+Why did older implementations use a pointer?
+
+Suppose you wrote exactly the same code:
+
+Singleton& getInstance() {
+    static Singleton instance;
+    return instance;
+}
+
+If two threads called getInstance() simultaneously, the C++ standard did not guarantee that only one thread would initialize instance.
+
+So why did people use pointers?
+
+They wanted lazy initialization, so they wrote:
+
+class Singleton {
+private:
+    static Singleton* instance;
+
+public:
+    static Singleton* getInstance() {
+        if (instance == nullptr)
+            instance = new Singleton();
+
+        return instance;
+    }
+};
+
+This created the object only when it was first needed.
+And for thread safety they used mutex. 
+*/
