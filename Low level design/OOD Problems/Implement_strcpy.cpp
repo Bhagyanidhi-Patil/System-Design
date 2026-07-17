@@ -33,7 +33,7 @@ char* my_strcpy(const char* src,char* dest){
 } 
 
 int main(){
-    const char* src = "hello";
+    const char src[] = "hello";
     char dest[10];
     my_strcpy(src,dest);
     cout<<dest<<endl;
