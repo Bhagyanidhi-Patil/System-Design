@@ -37,4 +37,34 @@ It returns the difference between the first mismatched characters.
 
 strcmp() does not return the difference between two strings.
 It returns the difference between the first pair of characters that differ.
+
+--------------
+
+strcmp() vs strncmp()
+| Feature      | `strcmp()`                 | `strncmp()`                                               |
+| ------------ | -------------------------- | --------------------------------------------------------- |
+| Purpose      | Compares entire strings    | Compares only the first **n** characters                  |
+| Syntax       | `strcmp(s1, s2)`           | `strncmp(s1, s2, n)`                                      |
+| Stops when   | First mismatch or `'\0'`   | First mismatch, `'\0'`, or after comparing `n` characters |
+| Return value | `0`, positive, or negative | `0`, positive, or negative                                |
+| Use case     | Compare complete strings   | Compare prefixes or limit comparison                      |
+
+
+int stringncompare(const char* s1, const char* s2, size_t n)
+{
+    while (n > 0 && *s1 == *s2)
+    {
+        if (*s1 == '\0')
+            return 0;
+
+        s1++;
+        s2++;
+        n--;
+    }
+
+    if (n == 0)
+        return 0;
+
+    return *s1 - *s2;
+}
 */
