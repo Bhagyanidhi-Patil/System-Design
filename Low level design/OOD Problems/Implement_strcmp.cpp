@@ -19,3 +19,22 @@ int main(){
     cout<<stringcompare(c1,c3)<<endl;
     return 0;
 }
+
+/*
+strcmp() is a standard C library function used to compare 
+two C-style strings (char* or const char*) lexicographically (dictionary order).
+
+strcmp() compares two null-terminated C strings character by character.
+
+Return Value
+Return Value	Meaning
+0	               Both strings are equal
+< 0	               str1 is lexicographically smaller than str2
+> 0	               str1 is lexicographically greater than str2
+
+It does not return only -1, 0, or 1.
+It returns the difference between the first mismatched characters.
+
+strcmp() does not return the difference between two strings.
+It returns the difference between the first pair of characters that differ.
+*/
