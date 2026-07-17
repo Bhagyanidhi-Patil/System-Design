@@ -18,14 +18,17 @@ using namespace std;
 
 size_t my_strlen(const char* str){
     size_t len = 0;
-    while(str[len]!=0){
+    while(*str!='\0'){
         len++;
+        str++;
     }
     return len;
 }
 
 int main(){
     const char* text = "hello,world!";
+    // const char[] = "hello world!"; 
+    // Whether you pass char* or char[], the implementation does not change. This is because an array decays into a pointer when passed to a function.
     cout<<"Length of the string is: "<<my_strlen(text)<<endl;
     return 0;
 }
