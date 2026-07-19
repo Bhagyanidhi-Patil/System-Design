@@ -87,7 +87,7 @@ public:
         if(cache.size()==capacity){
             Node* lru = tail->prev;
             remove(lru);
-            cache.erase(lru->value);
+            cache.erase(lru->key);
             delete lru;
         }
         Node* node = new Node(key,value);
