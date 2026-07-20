@@ -69,8 +69,7 @@ public:
 
     int get(int key){
         if (cache.find(key) == cache.end()) return -1;
-        auto it = cache.find(key);
-        Node* node = it->second;
+        Node* node = cache[key];
         remove(node);
         insertToFront(node);
         return node->value;
@@ -78,7 +77,7 @@ public:
 
     void put(int key,int value){
         if(cache.find(key)!=cache.end()){
-            Node* node = cache.find(key)->second;
+            Node* node = cache[key];
             node->value = value;
             remove(node);
             insertToFront(node);
