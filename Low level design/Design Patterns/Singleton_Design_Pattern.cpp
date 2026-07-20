@@ -7,9 +7,11 @@ instance and provides a global point of access to that instance.
 No matter how many times you try to create it, you always get the same instance.
 
 📌 Key Steps in Implementing Singleton
-	1. Private Constructor → Prevents direct instantiation.
-	2. Static Member Variable → Holds the single instance of the class.
-	3. Public getInstance() Method → Provides global access to the instance.
+    1. Make the constructor private so that objects cannot be created directly from outside the class.
+    2. Use a static member variable to store the single instance because a static member belongs to the class 
+        and has only one copy throughout the program.
+    3. Provide a public static getInstance() method that creates the object only if it doesn't already exist and 
+        returns the same instance on every call. This gives global access to the single object.
 
              UML-Diagram
 
@@ -45,7 +47,7 @@ There are two types to initaize singleton instance : Eager and Lazy initalizatio
 using namespace std;
 class Singleton{
 private:
-    static Singleton *instance;
+    static Singleton* instance;
     
     Singleton(){
         cout<<"Singleton created!"<<endl;
@@ -82,7 +84,7 @@ using namespace std;
 
 class Singleton{
 private:
-    static Singleton *instance;
+    static Singleton* instance;
     static mutex mtx;
     Singleton(){
         cout<<"Singleton created!"<<endl;
