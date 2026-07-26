@@ -1,483 +1,324 @@
-## Flow:
+## Flow : 
 
-### Step 1: main() starts
-```
-int main()
-{
-    ThreadPool pool(3);
-```
-`You create a thread pool with 3 worker threads.`
-
-Memory looks like this:
-```
-ThreadPool
-
-Workers : Empty
-
-Task Queue : Empty
-
-stop = false
 ```
 
----
-
-### Step 2: Constructor is called
-`ThreadPool(int n): stop(false)`
-
-The pool is active.
-
-Now the loop runs.
+ThreadPool pool(3)
+        │
+        ▼
+Create 3 worker threads
+        │
+        ▼
+Each thread enters while(true)
+        │
+        ▼
+Queue empty?
+        │
+      Yes
+        │
+        ▼
+Sleep in cv.wait()
+        │
+        ▼
+submit()
+        │
+        ▼
+Task pushed into queue
+        │
+        ▼
+notify_one()
+        │
+        ▼
+One worker wakes
+        │
+        ▼
+Take task
+        │
+        ▼
+Execute task
+        │
+        ▼
+Loop again
+        │
+        ├── Queue not empty → take another task
+        │
+        └── Queue empty → sleep
 ```
-for(int i=0;i<n;i++)
-```
-Since n = 3, it creates:
-```
-Worker 1
-Worker 2
-Worker 3
-```
-using
 
-`workers.emplace_back(...)`
+## CV condition explaination
+`In this code:`
 
-Now
-```
-Workers
-
-Worker 1
-
-Worker 2
-
-Worker 3
-```
-All three threads immediately start executing.
-
----
-
-### Step 3: Each worker starts
-
-Worker 1 executes
-
-`while(true)`
-
-Worker 2 also executes
-
-`while(true)`
-
-Worker 3 also executes
-
-`while(true)`
-
-So all workers are running simultaneously.
-
----
-
-### Step 4: Workers reach cv.wait()
-
-Each worker executes
-
-`unique_lock<mutex> lock(mtx);`
-
-Suppose Worker 1 gets the mutex first.
-
-It checks
-```
-cv.wait(lock,[this]()
-{
+```cpp
+cv.wait(lock, [this]() {
     return stop || !tasks.empty();
 });
 ```
-Current values
 
-`stop = false`
+`stop` means:
 
-`tasks.empty() = true`
-
-Condition
-
-`false || false = false`
-
-Therefore Worker 1 sleeps.
-
-When cv.wait() sleeps:
-
-- it automatically releases the mutex
-- so another worker can acquire it
-
-Now Worker 2 locks the mutex.
-
-Same condition.
-
-`Queue still empty.`
-
-`Worker 2 sleeps.`
-
-Again mutex released.
-
-`Worker 3 does exactly the same.`
-
-Now
+```cpp
+stop == true
 ```
-Worker1  Sleeping
 
-Worker2  Sleeping
+So the predicate is actually equivalent to:
 
-Worker3  Sleeping
+```cpp
+cv.wait(lock, [this]() {
+    return (stop == true) || (!tasks.empty());
+});
 ```
-CPU usage is almost zero because they are waiting efficiently.
+
+Let's see all cases.
+
+### Case 1: `stop = false`, queue is empty
+
+```cpp
+stop = false;
+tasks.empty() = true;
+
+return false || false;
+```
+
+**Result:**
+
+```cpp
+false
+```
+
+➡️ The worker **continues waiting**.
 
 ---
 
-### Step 5: submit() is called
+### Case 2: `stop = false`, queue has tasks
 
-Loop starts.
+```cpp
+stop = false;
+tasks.empty() = false;
+
+return false || true;
 ```
-for(int i=1;i<=10;i++)
+
+**Result:**
+
+```cpp
+true
 ```
-First iteration
+
+➡️ The worker **wakes up** and executes a task.
+
+---
+
+### Case 3: `stop = true`, queue is empty
+
+```cpp
+stop = true;
+tasks.empty() = true;
+
+return true || false;
 ```
-pool.submit(...)
+
+**Result:**
+
+```cpp
+true
 ```
-The lambda is
+
+➡️ The worker **wakes up**. Then it executes:
+
+```cpp
+if (stop && tasks.empty())
+    return;
 ```
-[i]()
-{
-    cout<<"Task "<<i;
+
+Since both conditions are true, the worker thread **exits**.
+
+---
+
+### Case 4: `stop = true`, queue has tasks
+
+```cpp
+stop = true;
+tasks.empty() = false;
+
+return true || true;
+```
+
+**Result:**
+
+```cpp
+true
+```
+
+➡️ The worker **wakes up**, processes the remaining tasks, and only exits after the queue becomes empty.
+
+
+## Destructor explaination 
+
+```cpp
+~ThreadPool() {
+    {
+        lock_guard<mutex> lock(mtx);
+        stop = true;
+    }
+
+    cv.notify_all();
+
+    for (auto &t : workers)
+        t.join();
 }
 ```
-For i = 1
 
-the lambda becomes
+### Step-by-step Explanation
+
+#### Step 1: Acquire the mutex
+
+```cpp
+lock_guard<mutex> lock(mtx);
 ```
-[]()
-{
-    cout<<"Task 1";
-}
-```
+
+The mutex is locked so that no worker thread can access or modify shared data (`stop` and `tasks`) while it is being updated.
 
 ---
 
-### Step 6: Inside submit()
-`lock_guard<mutex> lock(mtx);`
+#### Step 2: Set the stop flag
 
-Acquire mutex.
-
-Queue : `Empty`
-
-Now
-
-`tasks.emplace(task);`
-
-Queue becomes
+```cpp
+stop = true;
 ```
-Front
 
-Task1
-```
-`Unlock automatically.`
-
-Then
-```
-cv.notify_one();
-```
-One sleeping worker wakes.
-
-Suppose Worker 2 wakes.
+This tells all worker threads that the thread pool is shutting down.
 
 ---
 
-### Step 7: Worker wakes
+#### Step 3: Release the mutex
 
-Worker 2 was inside
-
-`cv.wait(...)`
-
-Now it checks again
-
-`stop || !tasks.empty()`
-
-Queue is
-
-`Task1`
-
-So
-
-`!tasks.empty()`
-
-is
-
-`true`
-
-Condition
-
-`false || true = true`
-
-Therefore it continues.
+When `lock_guard` goes out of scope, the mutex is automatically unlocked.
 
 ---
 
-### Step 8: Stop check
-```
-if(stop && tasks.empty())
-```
-Current values
-```
-stop = false
+#### Step 4: Wake up all worker threads
 
-tasks.empty() = false
-```
-Condition
-
-`false && false = false`
-
-Continue.
-
----
-
-### Step 9: Pick one task
-
-`task = move(tasks.front());`
-
-Local variable
-```
-task
-
-↓
-
-Task1 Lambda
-```
-Queue still contains Task1 until
-
-`tasks.pop();`
-
-After pop
-```
-Queue
-
-Empty
-```
-Mutex released.
-
----
-
-### Step 10: Execute task
-
-Now
-
-`task();`
-
-runs
-```
-cout<<"Task 1 executed..."
-```
-Output
-```
-Task 1 executed by 12345
-```
-Worker finishes.
-
----
-
-### Step 11: Worker loops again
-
-Worker goes back
-
-`while(true)`
-
-Again
-
-`cv.wait(...)`
-
-Queue empty.
-
-Worker sleeps again.
-
----
-
-### Step 12: Second submit()
-
-Loop in main
-
-`i = 2 `
-
-Submit
-
-Queue
-```
-Task2
-```
-`notify_one()`
-
-Maybe Worker 1 wakes.
-
-Worker 1 executes Task2.
-
----
-
-### Step 13: Third submit()
-
-Queue
-```
-Task3
-```
-notify_one()
-
-Worker 3 wakes.
-
-Executes Task3.
-
----
-
-### Step 14: Fourth submit()
-
-Now all workers may already be busy.
-
-Suppose
-```
-Worker1 -> Task2
-
-Worker2 -> Task1
-
-Worker3 -> Task3
-```
-You submit Task4.
-
-Queue
-```
-Task4
-```
-
-**No worker is sleeping.**
-
-So nobody wakes.
-
-Task4 simply waits.
-
-As soon as Worker2 finishes,
-
-it returns to
-
-`while(true)`
-
-Checks queue.
-
-Finds Task4.
-
-Executes it.
-
-**Same happens for Task5...Task10**
-
-Tasks are executed whenever a worker becomes free.
-
-**Example**
-```
-Queue
-
-Task5
-
-Task6
-
-Task7
-```
-Workers continuously take
-```
-Take front
-
-↓
-
-Execute
-
-↓
-
-Repeat
-```
-After loop finishes
-`return 0;`
-
-Now
-
-pool
-
-goes out of scope.
-
-`Destructor is called automatically.`
-
-Destructor
-`stop = true;`
-
-Now
-```
-stop = true
-```
-Then
-```
+```cpp
 cv.notify_all();
 ```
-Suppose workers are sleeping
+
+Any workers sleeping inside
+
+```cpp
+cv.wait(lock, [this]() {
+    return stop || !tasks.empty();
+});
 ```
-Worker1 Sleeping
 
-Worker2 Sleeping
+are awakened.
 
-Worker3 Sleeping
-```
-All wake up.
-
-Workers wake again
-
-Condition
-```
-stop || !tasks.empty()
-```
-Now
-```
-stop = true
-```
-Condition immediately becomes
-
-true
-
-Workers continue.
-
-Stop check
-
-Queue already empty.
-
-So
-```
-if(stop && tasks.empty())
-```
-becomes
-```
-true && true
-
-=
-
-true
-```
-Each worker executes
-
-return;
-
-Thread exits.
-
-join()
-
-Destructor finally does
-```
-for(auto &t:workers)
-    t.join();
-```
-Main thread waits until
-```
-Worker1 exits
-
-Worker2 exits
-
-Worker3 exits
-```
-After all threads finish,
-
-program terminates safely.
+Since `stop == true`, the predicate becomes `true`, so all workers continue execution.
 
 ---
+
+#### Step 5: Worker behavior after waking
+
+Each worker checks:
+
+```cpp
+if (stop && tasks.empty())
+    return;
+```
+
+There are two possibilities:
+
+**Case 1: Queue is empty**
+
+```text
+stop = true
+tasks.empty() = true
+```
+
+The condition is true, so the worker thread exits immediately.
+
+---
+
+**Case 2: Queue still contains tasks**
+
+```text
+stop = true
+tasks.empty() = false
+```
+
+The condition is false, so the worker removes a task from the queue and executes it.
+
+After finishing, it loops back, checks the queue again, and continues processing any remaining tasks.
+
+Once the queue becomes empty, the condition
+
+```cpp
+stop && tasks.empty()
+```
+
+becomes true, and the worker exits.
+
+---
+
+#### Step 6: Wait for all workers to finish
+
+```cpp
+for (auto &t : workers)
+    t.join();
+```
+
+`join()` blocks the destructor until every worker thread has exited.
+
+Only after all worker threads finish does the destructor return, ensuring that the thread pool shuts down cleanly without leaving any threads running.
+
+- `You never call the destructor yourself; C++ calls it automatically.`
+- `When execution reaches: return 0; the local variable pool goes out of scope. Since pool is a stack (automatic) object, C++ automatically calls : ~ThreadPool();`
+
+**So the execution looks like this:**
+```
+main()
+  │
+  ▼
+ThreadPool pool(3);
+  │
+  ▼
+Constructor called
+  │
+  ├── stop = false
+  │
+  ├── Create Worker 1 ──► Starts immediately ──► Sleeps in cv.wait()
+  │
+  ├── Create Worker 2 ──► Starts immediately ──► Sleeps in cv.wait()
+  │
+  └── Create Worker 3 ──► Starts immediately ──► Sleeps in cv.wait()
+  │
+  ▼
+Constructor finishes
+  │
+  ▼
+submit() is called
+  │
+  ▼
+Task added to queue
+  │
+  ▼
+notify_one()
+  │
+  ▼
+One worker wakes up and executes the task
+   │
+   ▼
+return 0;
+   │
+   ▼
+pool goes out of scope
+   │
+   ▼
+~ThreadPool()            ← Destructor called automatically
+   │
+   ▼
+stop = true
+notify_all()
+join() all threads
+   │
+   ▼
+Program exits
+```
