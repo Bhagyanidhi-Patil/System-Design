@@ -13,23 +13,10 @@ It is designed to help you:
 
 ## 📚 What’s Inside
 
-### 🔹 High-Level Design (HLD)
+* **High-Level Design (HLD):** Scalable system architecture, distributed systems, and real-world system design case studies.
+* **Low-Level Design (LLD):** Object-oriented design, SOLID principles, machine coding, and C++ implementations.
+* **Design Patterns (C++):** Creational, Structural, and Behavioral design patterns with practical examples.
 
-* Scalability concepts
-* System architecture fundamentals
-* Distributed system basics
-
-### 🔹 Low-Level Design (LLD)
-
-* Object-oriented design problems
-* Clean code practices
-* Real-world class design
-
-### 🔹 Design Patterns (C++)
-
-* Creational patterns
-* Structural patterns
-* Behavioral patterns
 
 ---
 
