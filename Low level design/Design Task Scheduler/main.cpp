@@ -114,3 +114,100 @@ int main(){
     this_thread::sleep_for(chrono::seconds(12));
     scheduler.stop();
 }
+
+/*
+In this current implementation, there are only 2 threads.
+***********************************
+Thread 1: Main Thread
+***********************************
+This is created automatically when the program starts.
+
+It executes:
+
+int main() {
+
+    Scheduler scheduler;
+
+    scheduler.start();
+
+    scheduler.addTask(...);
+
+    scheduler.addTask(...);
+
+    scheduler.addTask(...);
+
+    this_thread::sleep_for(...);
+
+    scheduler.stop();
+}
+
+So the main thread is responsible for:
+
+Creating the scheduler
+Starting the worker thread
+Adding tasks
+Sleeping
+Stopping the scheduler
+
+***********************************
+Thread 2: Worker Thread
+***********************************
+When you call
+
+scheduler.start();
+
+inside
+
+void start() {
+
+    running = true;
+
+    worker = thread(&Scheduler::run, this);
+}
+
+this line worker = thread(&Scheduler::run, this); creates a new thread.
+
+This new thread immediately starts executing
+Scheduler::run()
+
+So now there are two threads running simultaneously.
+
+----
+In Scheduler::run() function :
+
+If the priority queue is empty, cv.wait(lock) releases the mutex and waits. 
+After being notified, the continue statement starts the next iteration of the while loop, 
+so pq.top() is not executed in that iteration. 
+It is executed only when the priority queue is not empty.
+
+continue is not executed immediately after cv.wait(lock) is called, cv.wait(lock) is a blocking call. Once cv.notify is called
+this thread wakesup and runs next line that is continue.
+
+The worker thread sees that the queue is empty, calls cv.wait(lock), releases the mutex, and goes to sleep. 
+The main thread later adds a task and calls notify_one(). The worker thread wakes up, reacquires the mutex, 
+executes continue, starts the next iteration, sees that the queue is no longer empty, and then executes pq.top(), 
+pq.pop(), and execute().
+
+Now, suppose execute() takes 5 seconds. During those 5 seconds...Main Thread Calls 'scheduler.addTask(newTask);'
+
+Inside addTask():
+    lock_guard<mutex> lock(mtx);
+    pq.push(newTask);
+    cv.notify_one();
+
+Since the worker already called lock.unlock();
+the main thread immediately acquires the mutex. Push new task to queue and notify one.
+
+The worker is still here:
+schedule_task.task->execute();
+
+It does not stop executing.It continues until execute() finishes.
+After execute() finishes. The worker reaches the end of the loop.
+Then executes while loop , since it is infinte loop,
+while(running)
+
+Next iteration:
+unique_lock<mutex> lock(mtx);
+
+It locks the mutex again.Now the priority queue already contains the new task added by the main thread.So it processes that task next.
+*/
