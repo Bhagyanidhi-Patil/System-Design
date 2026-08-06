@@ -1,4 +1,4 @@
-
+## Question : How does Instagram load more posts? How would you paginate the feed?
 ## Pagination
 
 Pagination is one of those topics that comes up often in system design interviews because almost every large application needs to show data in chunks rather than loading everything at once. Pagination is used to fetch large datasets in smaller chunks instead of loading everything at once.
