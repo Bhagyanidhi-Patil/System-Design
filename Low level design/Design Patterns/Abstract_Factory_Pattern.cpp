@@ -1,6 +1,8 @@
 /*
 • Abstract factory method is a factory of a factory pattern(pattern inside a pattern).
 • It is creational design pattern which is required for creating objects which belong to a family of similar objects. 
+• Factory pattern focuses on creating a single object/product, where as abstract factory pattern focuses 
+on creating familes of related products together. 
 Client
    |
    v
