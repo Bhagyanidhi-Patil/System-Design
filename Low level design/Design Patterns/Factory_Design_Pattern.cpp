@@ -77,6 +77,29 @@ public:
         else
             return nullptr;
     }
+
+    // static Notification& sendNotification(string type) {
+    //     static EmailNotification email;
+    //     static SMSNotification sms;
+    //     static PushNotification push;
+
+    //     if (type == "Email") return email;
+    //     if (type == "SMS") return sms;
+    //     if (type == "Push") return push;
+
+    //     throw invalid_argument("Invalid notification type");
+    // }
+
+    // static unique_ptr<Notification> sendNotification(string type) {
+        // if(type == "Email")
+        //     return make_unique<EmailNotification>();
+        // if(type == "SMS")
+        //     return make_unique<SMSNotification>();
+        // if(type == "Push")
+        //     return make_unique<PushNotification>();
+
+        // return nullptr;
+        // }
 };
 
 //Client 
