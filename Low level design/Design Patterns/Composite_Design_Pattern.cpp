@@ -1,113 +1,136 @@
 /*
 The Composite Design Pattern is a structural pattern that lets you treat individual objects and groups of objects uniformly. 
 It’s especially useful when you’re working with tree-like structures (like file systems, UI elements, or organizational hierarchies).
+----
+Real-Life Example: File System 📁
 
-🧱 Components of Composite Pattern
-1.Component (Base Class)
-    Declares the common interface
-2.Leaf
-    Represents individual objects (no children)
-3.Composite
-    Represents a group of objects (can contain children)
+Think about your computer.
 
-            UML-Diagram
-                +------------------+
-                |    Graphic       |   <<interface>>
-                +------------------+
-                | + draw() = 0     |
-                +------------------+
-                         ▲
-            ┌────────────┼────────────┐
-            │            │            │
-   +---------------+  +---------------+  +------------------+
-   |    Circle     |  |  Rectangle    |  |      Group       |
-   +---------------+  +---------------+  +------------------+
-   | + draw()      |  | + draw()      |  | - children       |
-   +---------------+  +---------------+  | : List<Graphic>  |
-                                         +------------------+
-                                         | + add(Graphic*)  |
-                                         | + draw()         |
-                                         +------------------+
-                                                 ▲
-                                                 │
-                                      (contains / aggregates)
-                                                 │
-                                                 ▼
-                                           Graphic
+Folder
+├── File1.txt
+├── File2.txt
+└── Photos
+      ├── img1.jpg
+      └── img2.jpg
+
+Here,
+
+File → Leaf node
+Folder → Composite node
+
+When you click Delete on a folder,
+
+It deletes all its files.
+It deletes all its subfolders.
+
+Notice that Delete works for both:
+
+A single file
+A folder containing hundreds of files
+
+This is exactly what Composite provides.
+----
+Block Diagram
+                     Component
+                  +-------------+
+                  | operation() |
+                  +-------------+
+                        ^
+             -------------------------
+             |                       |
+             |                       |
+         Leaf(File)            Composite(Folder)
+         +----------+          +------------------+
+         |operation()|         | vector<Component*>|
+         +----------+          | add()            |
+                               | remove()         |
+                               | operation()      |
+                               +------------------+
+                                        |
+                               -------------------
+                               |        |        |
+                              File     File    Folder
+
+
+
+When to Use Composite?
+
+Use it when you have a tree structure:
+
+📁 File System
+🌳 Organization Hierarchy
+📂 Menu/Submenu
+🛒 Categories/Subcategories
+🎨 Graphics (Circle + Group of Shapes)
+🌐 HTML/XML DOM Tree
+
 */
+
 #include <iostream>
 #include <vector>
 using namespace std;
 
-//Component Interface
-class Graphic {
+// Component
+class FileSystem {
 public:
-    virtual void draw() = 0;
-    virtual ~Graphic() {}
+    virtual void show() = 0;
+    virtual void add(FileSystem* obj) {
+        // Default: do nothing
+    }
+    virtual ~FileSystem() {}
 };
 
-//Leaf
-class Circle:public Graphic{
+// Leaf
+class File : public FileSystem {
+    string name;
+
 public:
-    void draw() override{
-        cout<<"Drawing a circle"<<endl;
-    }
-};
-class Rectangle : public Graphic {
-public:
-    void draw() override {
-        cout << "Drawing Rectangle\n";
+    File(string n) : name(n) {}
+
+    void show() override {
+        cout << "File: " << name << endl;
     }
 };
 
-//Composite
-class Group:public Graphic{
-    vector<Graphic*>children;
+// Composite
+class Folder : public FileSystem {
+    string name;
+    vector<FileSystem*> children;
+
 public:
-    void add(Graphic* g){
-        children.push_back(g);
+    Folder(string n) : name(n) {}
+
+    void add(FileSystem* obj) override{
+        children.push_back(obj);
     }
-    void draw() override{
-        cout<<"Drawing Circle from Group:"<<endl;
-        for(auto child:children){
-            child->draw();
-        }
+
+    void show() override {
+        cout << "Folder: " << name << endl;
+
+        for (auto child : children)
+            child->show();
     }
 };
 
 int main() {
-    // Leaf objects
-    Graphic* circle1 = new Circle();
-    Graphic* circle2 = new Circle();
-    Graphic* rect1 = new Rectangle();
 
-    // First group
-    Group* group1 = new Group();
-    group1->add(circle1);
-    group1->add(rect1);
+    FileSystem* file1 = new File("resume.pdf");
+    FileSystem* file2 = new File("photo.jpg");
 
-    // Main group (nested composite)
-    Group* mainGroup = new Group();
-    mainGroup->add(group1);
-    mainGroup->add(circle2);
+    FileSystem* photos = new Folder("Photos");
+    photos->add(file2);
 
-    // Uniform call
-    mainGroup->draw();
+    FileSystem* documents = new Folder("Documents");
+    documents->add(file1);
+    documents->add(photos);
 
-    return 0;
+    FileSystem* root = new Folder("Root");
+    root->add(documents);
+
+    root->show();
+
+    delete root;   // (Assuming Folder destructor deletes its children)
 }
-/*
-Code explaination:
-1. Component → Graphic
-    This is the common interface
-    Both leaf and composite classes inherit from it
-    The client only knows about Graphic, not concrete types
-2.Leaf → Circle , Reactangle
-    A basic object
-    Cannot contain other objects
-    Implements draw() directly
-3.Composite → Group
-    It stores a collection of Graphic objects
-    Important: it stores the base type, not Circle
-        So it can hold: Circle (leaf) or Group (another composite)
-*/
+//Because both individual objects (File) and groups of objects (Folder) implement the same FileSystem interface. 
+//The client treats both uniformly through FileSystem*, and since a Folder can contain other FileSystem objects (files or folders), 
+//it forms a tree structure.
