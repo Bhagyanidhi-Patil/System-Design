@@ -1,140 +1,144 @@
 /*
 The Bridge Design Pattern is a structural design pattern that separates an abstraction from its implementation,
-so the two can vary independently.
+so the two can change independently.
 “Split a class into two parts: abstraction and implementation — and connect them with a bridge.”
 
+Real-world Example: Remote Control & TV 📺
+
 Imagine you have:
+Remotes
+    Basic Remote
+    Advanced Remote
+TV Brands
+    Sony TV
+    Samsung TV
 
-Shapes → Circle, Rectangle
-Drawing APIs → OpenGL, DirectX
+Without Bridge, you'd need:
+    BasicSonyRemote
+    BasicSamsungRemote
+    AdvancedSonyRemote
+    AdvancedSamsungRemote
 
-Without Bridge:
-CircleOpenGL, CircleDirectX, RectangleOpenGL, RectangleDirectX
+As more remotes and TV brands are added, the number of classes explodes.
 
-With Bridge:
-Shape → uses → DrawingAPI
+Instead, Bridge connects them using composition.
 
-🧱 Structure
-1.Abstraction
-    High-level control (e.g., Shape)
-2.Refined Abstraction
-    Extended abstraction (e.g., Circle)
-3.Implementor (interface)
-    Defines implementation methods (e.g., DrawingAPI)
-4.Concrete Implementors
-    Actual implementations (OpenGL, DirectX)
+Block Diagram
+                Abstraction
+             +----------------+
+             |    Remote      |
+             +----------------+
+             | Device* device |
+             | togglePower()  |
+             +----------------+
+                    |
+         -------------------------
+         |                       |
+         |                       |
++----------------+      +-------------------+
+| BasicRemote    |      | AdvancedRemote    |
++----------------+      +-------------------+
 
-                UML-Diagram
-                
-                <<abstract>>
-                +----------------------+
-                |        Shape         |
-                +----------------------+
-                | - api: DrawingAPI*   |
-                +----------------------+
-                | + draw()             |
-                +----------------------+
-                          ▲
-                          │  (is-a)
-                          │
-                +----------------------+
-                |       Circle         |
-                +----------------------+
-                | - x: float           |
-                | - y: float           |
-                | - radius: float      |
-                +----------------------+
-                | + draw()             |
-                +----------------------+
+                    has-a
+                      |
+                      v
 
-
-        (has-a / association)
-   Shape ◇---------------------------> DrawingAPI       [Abstraction -----> Implementor]
-                                                                    (has-a)
-
-
-                <<interface>>
-                +----------------------+
-                |     DrawingAPI       |
-                +----------------------+
-                | + drawCircle()       |
-                +----------------------+
-                          ▲
-             ┌────────────┴────────────┐
-             │                         │
-      (is-a) │                         │ (is-a)
-             │                         │
-+----------------------+   +----------------------+
-|      OpenGLAPI       |   |     DirectXAPI       |
-+----------------------+   +----------------------+
-| + drawCircle()       |   | + drawCircle()       |
-+----------------------+   +----------------------+
+            +------------------+
+            |      Device      |  <-- Implementor
+            +------------------+
+            | powerOn()        |
+            | powerOff()       |
+            +------------------+
+                  ^
+                  |
+         --------------------
+         |                  |
++----------------+   +----------------+
+| SonyTV         |   | SamsungTV      |
++----------------+   +----------------+
 */
 
-#include<iostream>
+#include <iostream>
 using namespace std;
 
-//Implementor Interface
-class DrawingAPI {
+// Implementor
+class Device {
 public:
-    virtual void drawCircle(float x, float y, float radius) = 0;
-    virtual ~DrawingAPI() {}
+    virtual void powerOn() = 0;
+    virtual void powerOff() = 0;
+    virtual ~Device() {}
 };
 
-//Concrete Implementations
-class OpenGLAPI : public DrawingAPI {
+// Concrete Implementations
+class SonyTV : public Device {
 public:
-    void drawCircle(float x, float y, float radius) override {
-        std::cout << "Drawing circle using OpenGL\n";
+    void powerOn() override {
+        cout << "Sony TV ON\n";
+    }
+
+    void powerOff() override {
+        cout << "Sony TV OFF\n";
     }
 };
 
-class DirectXAPI : public DrawingAPI {
+class SamsungTV : public Device {
 public:
-    void drawCircle(float x, float y, float radius) override {
-        std::cout << "Drawing circle using DirectX\n";
+    void powerOn() override {
+        cout << "Samsung TV ON\n";
+    }
+
+    void powerOff() override {
+        cout << "Samsung TV OFF\n";
     }
 };
 
-//Abstraction
-class Shape {
+// Abstraction
+class Remote {
 protected:
-    DrawingAPI* api;
+    Device* device;
 
 public:
-    Shape(DrawingAPI* api) : api(api) {}
-    virtual void draw() = 0;
-    virtual ~Shape() {}
+    Remote(Device* d) {
+        device = d;
+    }
+
+    virtual void togglePower() = 0;
+    virtual ~Remote() {}
 };
 
-//Refined Abstraction
-class Circle : public Shape {
-private:
-    float x, y, radius;
-
+// Refined Abstraction
+class BasicRemote : public Remote {
 public:
-    Circle(float x, float y, float r, DrawingAPI* api)
-        : Shape(api), x(x), y(y), radius(r) {}
+    BasicRemote(Device* d) : Remote(d) {}
 
-    void draw() override {
-        api->drawCircle(x, y, radius);
+    void togglePower() override {
+        device->powerOn();
+    }
+};
+
+// Another Refined Abstraction
+class AdvancedRemote : public Remote {
+public:
+    AdvancedRemote(Device* d) : Remote(d) {}
+
+    void togglePower() override {
+        device->powerOff();
     }
 };
 
 int main() {
-    DrawingAPI* opengl = new OpenGLAPI();
-    DrawingAPI* directx = new DirectXAPI();
 
-    Shape* c1 = new Circle(1, 2, 3, opengl);
-    Shape* c2 = new Circle(4, 5, 6, directx);
+    Device* sony = new SonyTV();
+    Device* samsung = new SamsungTV();
 
-    c1->draw();
-    c2->draw();
+    Remote* r1 = new BasicRemote(sony);
+    r1->togglePower();
 
-    delete c1;
-    delete c2;
-    delete opengl;
-    delete directx;
+    Remote* r2 = new AdvancedRemote(samsung);
+    r2->togglePower();
 
-    return 0;
+    delete sony;
+    delete samsung;
+    delete r1;
+    delete r2;
 }
