@@ -11,8 +11,8 @@ An unordered_map is built using:
     Buckets (array/vector) → stores elements
     Collision handling → multiple keys same index
 
-A map is a data structure that stores key–value pairs, where keys are unique and stored in sorted order,
-typically implemented using a self-balancing binary search tree.
+A map is a data structure that stores key–value pairs, where keys are unique and the key-value pairs are stored in sorted 
+order based on the KEY. Typically implemented using a self-balancing binary search tree.
 
 An unordered_map is a data structure that stores key–value pairs, where keys are unique and not ordered,
 typically implemented using a hash table for fast access.
