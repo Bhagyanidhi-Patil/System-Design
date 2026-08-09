@@ -15,6 +15,13 @@ In C++, you often see code like:
         Implements the same interface
         Does nothing (or default behavior)
 
+🔹 Benefits:
+    Avoids null checks
+    Reduces if (ptr != nullptr) code
+    Prevents null-pointer crashes
+    Makes code cleaner
+    Provides a default behavior
+
 🔹 Structure
 You typically have:
     Abstract base class (interface)
