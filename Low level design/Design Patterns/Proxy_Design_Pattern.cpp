@@ -1,6 +1,10 @@
 /*
 The Proxy Design Pattern is another structural design pattern where one object acts as a substitute 
 (or placeholder) for another object to control access to it.
+
+A proxy is a substitute/representative object that stands between the client and the real object.
+The client talks to the Proxy, and the Proxy decides whether/how to call the Real Object.
+
 🔷 Core Idea
     A Proxy sits in front of the real object and controls how it is accessed.
     Instead of calling the real object directly, the client talks to the proxy, which can:
