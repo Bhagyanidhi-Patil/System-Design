@@ -125,6 +125,8 @@ public:
             if(curr->children.count(parts[i])==0)
                 return "";
             curr = curr->children[parts[i]];
+            if(curr->type==NodeType::FILE_NODE)
+                return "";
         }
         string filename = parts.back();
         if(curr->children.count(filename)==0)
