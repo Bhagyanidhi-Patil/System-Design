@@ -1,4 +1,4 @@
-## Consistent Hashing
+## Hashing
 
 Hashing is a process used in computer science to convert input data of any size into a fixed-size string of characters, usually a sequence of numbers and letters. This output is called a hash value.
 
