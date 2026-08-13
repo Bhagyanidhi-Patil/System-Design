@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <string>
 #include <thread>
+#include <mutex>
 using namespace std;
 
 enum logLevel{
@@ -16,6 +17,7 @@ class logLimiter{
 private:
     unordered_map<string,chrono::steady_clock::time_point>m;
     chrono::steady_clock::duration timewindow;
+    mutex mtx;
 
     string makeKey(logLevel level,const string& message){
         return to_string(level)+"|"+message;
@@ -37,6 +39,7 @@ public:
     bool printMessage(logLevel level,const string& message){
         auto now = chrono::steady_clock::now();
         string key = makeKey(level,message);
+        lock_guard<mutex>lock(mtx);
 
         if(m.find(key)==m.end()){
             m[key] = now;
