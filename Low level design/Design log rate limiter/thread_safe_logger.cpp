@@ -13,7 +13,7 @@ enum Loglevel{
 
 class LoggerRateLimiter{
 private:
-    unordered_map<string,int>lastPrintedTime;
+    unordered_map<string,int>mTime;
     int timeWindow;
     mutex mtx;
 
@@ -39,8 +39,8 @@ public:
         
         lock_guard<mutex>lock(mtx);
 
-        if(lastPrintedTime.find(key)==lastPrintedTime.end() || timestamp - lastPrintedTime[key]>=timeWindow){
-            lastPrintedTime[key] = timestamp;
+        if(mTime.find(key)==mTime.end() || timestamp - mTime[key]>=timeWindow){
+            mTime[key] = timestamp;
 
                 cout << "[" << timestamp << "] "<< levelToString(level)<< ": "<< message << endl;
 

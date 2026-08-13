@@ -133,12 +133,12 @@ Error A (once every 10 seconds)
 ## 🧠 Core Idea (Design Approach)
 
 We maintain a hash map:
-message → lastPrintedTimestamp
+message → mTimestamp
 When a log request comes:
 
 - If message is new → print it  
 - If message exists:  
-  - Check currentTime - lastPrintedTime >= window  
+  - Check currentTime - mTime >= window  
     - Yes → print  
     - No → skip  
 

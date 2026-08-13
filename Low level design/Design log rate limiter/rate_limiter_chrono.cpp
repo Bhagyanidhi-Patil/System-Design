@@ -14,7 +14,7 @@ enum logLevel{
 
 class logLimiter{
 private:
-    unordered_map<string,chrono::steady_clock::time_point>lastPrinted;
+    unordered_map<string,chrono::steady_clock::time_point>m;
     chrono::steady_clock::duration timewindow;
 
     string makeKey(logLevel level,const string& message){
@@ -38,17 +38,17 @@ public:
         auto now = chrono::steady_clock::now();
         string key = makeKey(level,message);
 
-        if(lastPrinted.find(key)==lastPrinted.end()){
-            lastPrinted[key] = now;
+        if(m.find(key)==m.end()){
+            m[key] = now;
             cout << "[" << leveltostring(level) << "] "
                  << message << endl;
 
             return true;
         }
 
-        auto elapsed = chrono::duration_cast<chrono::seconds>(now-lastPrinted[key]);
+        auto elapsed = chrono::duration_cast<chrono::seconds>(now-m[key]);
         if(elapsed>=timewindow){
-            lastPrinted[key] = now;
+            m[key] = now;
             cout << "[" << leveltostring(level) << "] "
                  << message << endl;
 
