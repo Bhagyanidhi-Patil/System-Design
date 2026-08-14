@@ -30,71 +30,94 @@ public:
     }
 };
 
+// NULL object, used null design pattern 
+class NullNotification : public INotification {
+public:
+    void sendMessage(string receiver, string message) override {
+        cout << "No notification selected" << endl;
+    }
+};
+
 enum class NotificationType{
     EMAIL,
     PUSH,
     SMS
 };
 
-// class NotificationFactory{
-// public:
-//     static INotification* createNotification(NotificationType type){
-//         switch(type)
-//         {
-//             case NotificationType::SMS:
-//                 return new SMSNotification();
-//             case NotificationType::EMAIL:
-//                 return new EmailNotification();
-//             case NotificationType::PUSH:
-//                 return new PushNotification();
-//             default:
-//                 return NULL;
-//         }
-//     }
-// };
+/*
+Here, instead of enum class if you just use enum NotifcationType,
+then in switch you can use case EMAIL, case SMS insated of case NotificationType::EMAIL.
+*/
 
-// class NotificationService{
-// private:
-//     INotification* statergy;
-// public:
-//     NotificationService(INotification* statergy=nullptr){
-//         this->statergy = statergy;
-//     }
-//     void setStatergy(INotification* statergy){
-//         this->statergy = statergy;
-//     }
-//     void notify(string recevier,string message){
-//         if(statergy==nullptr){
-//             cout << "No notification strategy selected.\n";
-//             return;
-//         }
-//         statergy->sendMessage(recevier,message);
-//     }
-// };
+class NotificationFactory{
+public:
+    static INotification* createNotification(NotificationType type){
+        switch(type)
+        {
+            case NotificationType::SMS:
+                return new SMSNotification();
+            case NotificationType::EMAIL:
+                return new EmailNotification();
+            case NotificationType::PUSH:
+                return new PushNotification();
+            default:
+                return new NullNotification();
+        }
+    }
+};
 
-// int main(){
-//     INotification* notifier = NotificationFactory::createNotification(NotificationType::EMAIL);
-//     NotificationService service(notifier);
-//     service.notify("abc@gmail.com","Interview tommorow");
-//     delete notifier;
-//     cout<<endl;
+class NotificationService{
+private:
+    INotification* strategy;
+    NullNotification nullNotification;
+public:
+    NotificationService(INotification* strategy = nullptr) {
 
-//     notifier = NotificationFactory::createNotification(NotificationType::SMS);
-//     service.setStatergy(notifier);
-//     service.notify("9902334452","OTP is 8890");
-//     delete notifier;
-//     cout<<endl;
+        if (strategy == nullptr)
+            this->strategy = &nullNotification;
+        else
+            this->strategy = strategy;
+    }
 
-//     notifier = NotificationFactory::createNotification(NotificationType::PUSH);
-//     service.setStatergy(notifier);
-//     service.notify("XYZ","Your order is shipped!");
-//     delete notifier;
-//     cout<<endl;
+    void setStrategy(INotification* strategy) {
 
-//     return 0;
-// }
+        if (strategy == nullptr)
+            this->strategy = &nullNotification;
+        else
+            this->strategy = strategy;
+    }
+
+    void notify(string receiver, string message) {
+        strategy->sendMessage(receiver, message);
+    }
+};
+
+int main(){
+    INotification* notifier = NotificationFactory::createNotification(NotificationType::EMAIL);
+    NotificationService service(notifier);
+    service.notify("abc@gmail.com","Interview tommorow");
+    delete notifier;
+    cout<<endl;
+
+    notifier = NotificationFactory::createNotification(NotificationType::SMS);
+    service.setStrategy(notifier);
+    service.notify("9902334452","OTP is 8890");
+    delete notifier;
+    cout<<endl;
+
+    notifier = NotificationFactory::createNotification(NotificationType::PUSH);
+    service.setStrategy(notifier);
+    service.notify("XYZ","Your order is shipped!");
+    delete notifier;
+    cout<<endl;
+
+    return 0;
+}
 
 
+/* Below code is for same implmentaion but with smart pointers and move semantics */
+
+/*
 class NotificationFactory {
 public:
     static unique_ptr<INotification> createNotification(NotificationType type)
@@ -164,6 +187,8 @@ int main()
 
     return 0;
 }
+*/
+
 
 /*
 std::move is one of the most important concepts in modern C++.
