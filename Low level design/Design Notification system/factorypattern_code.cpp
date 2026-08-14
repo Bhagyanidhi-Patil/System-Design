@@ -77,6 +77,26 @@ public:
     }
 };
 
+/*
+class NotificationService {
+private:
+    INotification* notifier;
+
+public:
+    NotificationService(INotification* notifier) {
+        this->notifier = notifier;
+    }
+
+    void notify(string receiver, string message) {
+        if (notifier == nullptr) {
+            cout << "No notification selected\n";
+            return;
+        }
+
+        notifier->sendMessage(receiver, message);
+    }
+};
+*/
 int main()
 {
     NotificationService service;
