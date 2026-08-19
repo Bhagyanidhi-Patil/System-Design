@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include <map>
+#include <unordered_map>
 using namespace std;
 
 class Coffee{
@@ -149,7 +149,7 @@ public:
 
 class CoffeeMachine{
 private:
-    map<string,Ingredient>m;
+    unordered_map<string,Ingredient>m;
 public:
     CoffeeMachine():m{
         {"Coffee",Ingredient("Coffee",100)},
