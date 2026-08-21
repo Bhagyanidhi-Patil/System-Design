@@ -16,7 +16,9 @@ const int MAX_SIZE = 5;
 void producer(){
     for(int i=0;i<10;i++){
         unique_lock<mutex>lock(mtx);
-        cvProducer.wait(lock,[]{return q.size()<MAX_SIZE;});
+        cvProducer.wait(lock,[]{
+            return q.size()<MAX_SIZE;
+        });
         q.push(i);
         cout<<"Produced "<<i<<" "<<endl;
          // Unlock before notifying
@@ -28,7 +30,9 @@ void producer(){
 void consumer(){
     for(int i=0;i<10;i++){
         unique_lock<mutex>lock(mtx);
-        cvConsumer.wait(lock,[]{return !q.empty();});
+        cvConsumer.wait(lock,[]{
+            return !q.empty();
+        });
         cout<<"Consumed "<<q.front()<<" "<<endl;
         q.pop();
          // Unlock before notifying - release mutex early so other thread can acquire it immediately after notify (avoids unnecessary blocking)

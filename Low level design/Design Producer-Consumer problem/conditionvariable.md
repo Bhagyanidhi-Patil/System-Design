@@ -1,6 +1,6 @@
 # Why do We Need a Condition Variable?
-
-Imagine you have two threads:
+- A condition variable in C++ is a synchronization tool used when one thread needs to wait until some condition becomes true, instead of continuously checking it.
+- Imagine you have two threads:
 
 * **Producer Thread** → Produces data
 * **Consumer Thread** → Consumes data
