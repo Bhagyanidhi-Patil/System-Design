@@ -1,7 +1,7 @@
-Consistent hashing and a load balancer are related concepts but not the same thing. Here's the difference:
+### Consistent hashing and a load balancer are related concepts but not the same thing. Here's the difference:
 
-🔄 Consistent Hashing ≠ Load Balancer  
-But it can be used as part of a load balancing strategy.
+`🔄 Consistent Hashing ≠ Load Balancer  `
+- But it can be used as part of a load balancing strategy.
 
 ---
 
