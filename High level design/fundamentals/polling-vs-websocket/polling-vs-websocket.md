@@ -435,25 +435,4 @@ Client <=================> Server
       Real-time messages
 ```
 
-## Why TCP Matters
-
-WebSocket runs over TCP because TCP provides:
-
-- reliable delivery
-- ordered messages
-- persistent connection
-
-## How Server Tracks Connections
-
-Server maintains open socket objects.
-
-Example conceptually:
-
-- User1 → SocketA
-- User2 → SocketB
-- User3 → SocketC
-
-When server wants to push update:
-
-- `SocketB.send("new message")`
 
