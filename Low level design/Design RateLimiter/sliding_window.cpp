@@ -13,7 +13,7 @@ public:
 
 class SlidingWindowRateLimiter:public RateLimiter{
 private:
-    unordered_map<string,queue<chrono::steady_clock::time_point>>users;
+    unordered_map<string,queue<chrono::steady_clock::time_point>>m;
     int maxRequests;
     chrono::seconds windowSize;
     mutex mtx;
@@ -28,31 +28,30 @@ public:
         lock_guard<mutex>lock(mtx);
         auto now = chrono::steady_clock::now();
 
-        auto it = users.find(userId);
+    
+        if (m.find(userId) == m.end())
+        {
+            m[userId] = queue<chrono::steady_clock::time_point>();
+        }
 
-    if (it == users.end())
-    {
-        users[userId] = queue<chrono::steady_clock::time_point>();
-    }
+        while (!m[userId].empty())
+        {
+            auto elapsed = chrono::duration_cast<chrono::seconds>(
+                now - m[userId].front());
 
-    while (!users[userId].empty())
-    {
-        auto elapsed = chrono::duration_cast<chrono::seconds>(
-            now - users[userId].front());
+            if (elapsed >= windowSize)
+                m[userId].pop();
+            else
+                break;
+        }
 
-        if (elapsed >= windowSize)
-            users[userId].pop();
-        else
-            break;
-    }
+        if (m[userId].size() < maxRequests)
+        {
+            m[userId].push(now);
+            return true;
+        }
 
-    if (users[userId].size() < maxRequests)
-    {
-        users[userId].push(now);
-        return true;
-    }
-
-    return false;
+        return false;
 
     }
 };
