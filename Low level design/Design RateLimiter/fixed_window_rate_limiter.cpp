@@ -87,3 +87,69 @@ int main()
     return 0;
 }
 
+/*
+For global request implmentation (insated of limiting per user):
+
+#include <iostream>
+#include <unordered_map>
+#include <mutex>
+#include <chrono>
+#include <thread>
+using namespace std;
+
+
+class RateLimiter{
+public:
+    virtual bool allowRequest(const string& userId)=0;
+    virtual ~RateLimiter(){}
+};
+
+class FixedWindow:public RateLimiter{
+private:
+    int maxRequest;
+    int requests;
+    chrono::seconds windowSize;
+    chrono::steady_clock::time_point windowStart;
+    mutex mtx;
+public:
+    FixedWindow(int maxreq,int windowsec){
+        maxRequest = maxreq;
+        requests = 0;
+        windowSize = chrono::seconds(windowsec);
+        windowStart = chrono::steady_clock::now();
+    }
+
+    bool allowRequest(const string& userId)override{
+        lock_guard<mutex>lock(mtx);
+        auto now = chrono::steady_clock::now();
+        auto elapsed = chrono::duration_cast<chrono::seconds>(now-windowStart);
+        if(elapsed>=windowSize){
+            windowStart = now;
+            requests=1;
+            return true;
+        }
+        if(requests<maxRequest){
+            requests++;
+            return true;
+        }
+        return false;
+    }
+};
+
+int main() {
+    FixedWindow limiter(3, 5);  // 3 requests every 5 seconds
+
+    cout << limiter.allowRequest("A") << endl;  // 1 → ALLOW
+    cout << limiter.allowRequest("B") << endl;  // 1 → ALLOW
+    cout << limiter.allowRequest("C") << endl;  // 1 → ALLOW
+    cout << limiter.allowRequest("D") << endl;  // 0 → REJECT
+
+    this_thread::sleep_for(chrono::seconds(5));
+
+    cout << limiter.allowRequest("E") << endl;  // 1 → new window
+
+    return 0;
+}
+
+
+*/
