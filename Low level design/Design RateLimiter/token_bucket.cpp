@@ -19,7 +19,7 @@ public:
 
 class TokenBucket:public RateLimiter{
 private:
-    unordered_map<string,UserInfo>users;
+    unordered_map<string,UserInfo>m;
     int capacity;
     double refillRate;
     mutex mtx;
@@ -32,16 +32,14 @@ public:
     bool allowRequests(const string& userId) override{
         lock_guard<mutex>lock(mtx);
         auto now = chrono::steady_clock::now();
-        auto it = users.find(userId);
 
-        if(it==users.end()){
+        if(m.find(userId)==m.end()){
             UserInfo user;
             user.tokens = capacity;
             user.lastRefillTime = now;
-            users[userId] = user;
-            it = users.find(userId);
+            m[userId] = user;
         }
-        UserInfo &user = it->second;
+        UserInfo &user = m[userId];
         auto elapsed = chrono::duration_cast<chrono::seconds>(now-user.lastRefillTime).count();
 
         user.tokens=min((double)capacity,user.tokens+elapsed*refillRate);
