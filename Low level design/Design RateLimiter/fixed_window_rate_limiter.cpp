@@ -22,7 +22,7 @@ public:
 
 class FixedWindowRateLimiter : public RateLimiter{
 private:
-    unordered_map<string,userInfo>users;
+    unordered_map<string,userInfo>m;
     int maxRequests;
     chrono::seconds windowSize;
     mutex mtx;
@@ -38,20 +38,18 @@ public:
 
         auto now = chrono::steady_clock::now();
 
-        auto it = users.find(userId);
-
         // First request from this user
-        if (it == users.end())
+        if (m.find(userId)==m.end())
         {
             userInfo newUser;
             newUser.requestCount = 1;
             newUser.windowStart = now;
 
-            users[userId] = newUser;
+            m[userId] = newUser;
             return true;
         }
 
-        userInfo &user = it->second;
+        userInfo &user = m[userId];
 
         auto elapsed = chrono::duration_cast<chrono::seconds>(now - user.windowStart);
 
