@@ -1,7 +1,28 @@
 # Access Token vs Refresh Token
 
 Access tokens and refresh tokens are two different credentials used together in modern authentication (especially OAuth 2.0). They solve different problems.
+## 🔐 First: What is a token?
 
+When you log in to an application, you provide something like:
+```
+Username + Password
+        ↓
+      Login
+        ↓
+    Server verifies
+        ↓
+   Tokens are given
+```
+Instead of sending your password with every API request, the server gives you a token.
+
+The token basically says:
+
+`This user has already authenticated. You can trust this request.`
+
+There are two important types:
+
+- Access Token
+- Refresh Token
 ---
 
 ## Access Token
@@ -17,9 +38,30 @@ An access token is a credential that a client sends with API requests to prove t
 
 ### Example
 
-```http
-GET /api/orders
-Authorization: Bearer eyJhbGciOi...
+An access token is used to `access protected APIs/resources.`
+
+**For example**, suppose you log into Instagram.
+
+The application might make requests like:
+```
+GET /profile
+GET /messages
+POST /upload
+GET /followers
+```
+These APIs need authentication.
+
+So the client sends:
+
+`Authorization: Bearer <access_token>`
+
+The server checks the access token and says:
+```
+Token valid?
+     ↓
+   YES
+     ↓
+Allow request
 ```
 
 ### Why Short-Lived?
@@ -33,7 +75,15 @@ If stolen, the attacker has limited time to use it.
 
 ## Refresh Token
 
-A refresh token is used to obtain new access tokens without forcing the user to log in again.
+Now imagine your access token expires every 15 minutes.
+
+`Would you want to enter your password every 15 minutes?`
+
+**Obviously not 😄**
+
+That's where the refresh token comes in.
+
+`The refresh token is a longer-lived credential that is used to obtain a new access token.`
 
 ### Characteristics
 
@@ -138,30 +188,177 @@ That's why refresh tokens require extra protections (rotation, secure storage, r
   <img src="auth-flow.png" alt="Flow Diagram" width="700">
 </div>
 
-## How Systems Protect Refresh Tokens
+## What if refresh tokens itself gets stolen?
+This is the dangerous case. If a refresh token is stolen, an attacker may be able to keep getting new access tokens, potentially even after the original access token expires.
 
-### Store in HttpOnly Secure Cookies
+### 🛡️ How Do Systems Protect Against a Stolen Refresh Token?
 
-Instead of:
+Modern authentication systems use several techniques.
+
+**1. Refresh-token rotation**
+
+#### 🔄 What is Refresh Token Rotation?
+
+Normally, you might have:
+
+```text
+Access Token  → 15 minutes
+Refresh Token → 30 days
+```
+
+When the access token expires, the client sends the refresh token to get a new access token.
+
+With **refresh token rotation**, the server also gives you a **new refresh token** and immediately invalidates the old one.
+
+#### Without Rotation
+
+```text
+Refresh Token A
+       ↓
+   Refresh request
+       ↓
+New Access Token
+       ↓
+Refresh Token A is still valid
+```
+
+The same refresh token can potentially be used again and again.
+
+That's risky if it gets stolen.
+
+---
+
+#### With Rotation
+
+Suppose you initially have:
+
+```text
+Refresh Token A
+```
+
+The access token expires.
+
+You send:
+
+```text
+Refresh Token A
+        ↓
+   Authentication Server
+```
+
+The server responds:
+
+```text
+Access Token B
+Refresh Token B
+```
+
+And **Refresh Token A is now invalid**.
+
+```text
+Refresh Token A → ❌
+Refresh Token B → ✅
+```
+
+Next time:
+
+```text
+Refresh Token B
+        ↓
+   Authentication Server
+        ↓
+Access Token C
+Refresh Token C
+
+Refresh Token B → ❌
+Refresh Token C → ✅
+```
+
+So the refresh token keeps **rotating**:
+
+```text
+RT-A
+ ↓
+RT-B
+ ↓
+RT-C
+ ↓
+RT-D
+ ↓
+RT-E
+```
+
+That's where the name **refresh token rotation** comes from.
+
+
+---
+
+**2. Store refresh tokens securely**
+
+For web applications, refresh tokens are commonly kept in a **Secure + HttpOnly cookie**. This helps prevent JavaScript from directly reading the token.
+
+```text
+Browser
+  |
+  | HttpOnly cookie
+  ↓
+Refresh Token
+```
+
+So malicious JavaScript cannot simply do:
 
 ```javascript
-localStorage.setItem("refreshToken", token)
+document.cookie
 ```
 
-Use:
+to retrieve an HttpOnly cookie.
 
-```http
-Set-Cookie:
-refresh_token=...
-HttpOnly
-Secure
-SameSite=Strict
+---
+
+**3. Server-side revocation**
+
+The server can maintain refresh-token/session state:
+
+```text
+User 123
+   |
+   └── Refresh Token → Active
 ```
 
-Benefits:
+If the user logs out, changes their password, or suspicious activity is detected:
 
-* JavaScript cannot read it.
-* XSS attacks cannot directly steal it.
-* Sent only over HTTPS.
+```text
+Refresh Token → Revoked ❌
+```
+
+Then even if an attacker has the stolen token:
+
+```text
+Attacker
+   ↓
+Refresh Token
+   ↓
+Auth Server
+   ↓
+Revoked ❌
+```
+
+No new access token is issued.
+
+---
+
+**4. Expiration**
+
+Refresh tokens aren't necessarily valid forever.
+
+For example:
+
+```text
+Access token  → 15 minutes
+Refresh token → 30 days
+```
+
+After 30 days, the user has to authenticate again.
+
 
 
