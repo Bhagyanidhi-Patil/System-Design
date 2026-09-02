@@ -1,5 +1,7 @@
 A load balancer and consistent hashing both distribute requests across multiple servers, but they solve different problems and work in different ways.
 
+`Load balancer is a component and consistent hashing is a hashing technique.`
+
 | Aspect          | Load Balancer                                               | Consistent Hashing                                  |
 | --------------- | ----------------------------------------------------------- | --------------------------------------------------- |
 | Purpose         | Spread traffic evenly across servers                        | Route the same key/user/data to the same server     |
@@ -16,159 +18,191 @@ Consistent hashing: "Which server owns this key/data?"
 
 ---
 
-## 1. Are you distributing requests or data?
+## Load Balancer and Consistent Hashing
 
-Use a Load Balancer when you're distributing requests
+A **load balancer can use consistent hashing**, but it is important to understand that **consistent hashing is one possible load-balancing strategy**, not the default one.
 
-Example:
+## Normal Load Balancing
 
-- Web servers serving HTTP requests  
-- API servers  
-- Microservices replicas  
+Suppose you have:
 
-```
-Client  
-  ↓  
-Load Balancer  
-  ↓  
-Server A  
-Server B  
-Server C  
-```
-Any server can handle any request.
-
-Use Consistent Hashing when you're distributing data
-
-Example:
-
-- Distributed cache  
-- Database sharding  
-- Session storage  
-```
-user123 → Cache Node B  
-user456 → Cache Node A  
-user789 → Cache Node C  
-```
----
-
-A typical flow looks like this:
-```
-User  
-  ↓  
-Load Balancer  
-  ↓  
-App Server  
-  ↓  
-Consistent Hashing  
-  ↓  
-Database/Cache Shard  
+```text
+             Load Balancer
+             /     |     \
+            ↓      ↓      ↓
+          S1      S2      S3
 ```
 
----
+A common strategy is **Round Robin**:
 
-## Read Request Example
+```text
+Request 1 → S1
+Request 2 → S2
+Request 3 → S3
+Request 4 → S1
+Request 5 → S2
+...
+```
 
-User requests:
-
-**GET /users/123**  
-
-Load balancer sends request to App Server B.  
-
-App Server B computes:
-
-**hash(userId=123)**  
-
-Consistent hashing says:
-
-User 123 → Database Shard 3  
-
-App Server B reads from Shard 3.
+The goal is mainly to distribute requests evenly.
 
 ---
 
-## Write Request Example
+## What Does Consistent Hashing Do?
 
-User updates profile:
+Consistent hashing is useful when you want **the same client/key to consistently go to the same server**.
 
-**PUT /users/123**  
+For example:
 
-Load balancer sends request to App Server A.  
+```text
+User A → Load Balancer → S1
+User B → Load Balancer → S2
+User C → Load Balancer → S3
+```
 
-App Server A computes:
+The load balancer can hash something such as:
 
-**hash(userId=123)**  
+```text
+hash(user_id)
+```
 
-Consistent hashing again says:
+and use that hash to select a server.
 
-User 123 → Database Shard 3  
+So:
 
-App Server A writes to Shard 3.
+```text
+User A
+  ↓
+hash("A")
+  ↓
+Consistent Hash Ring
+  ↓
+S1
+```
 
----
-
-## 1. Are app servers replicas?
-
-Yes.
-
-App servers are usually stateless replicas  
-They run the same code  
-You can have 10, 100, or 1000 of them  
-
-Example:
-
-App Server A, B, C, D → all identical code  
-
-They don’t “own” user data.
-
----
-
-## 2. Do app servers contain actual data?
-
-Usually no.
-
-They typically:
-
-- Handle API logic  
-- Authenticate user  
-- Apply business rules  
-- Call databases / caches  
-
-They do NOT store persistent data.
-
-(Except sometimes temporary cache or session memory, but that’s not the source of truth.)
+The next request from User A will generally go to **S1 again**.
 
 ---
 
-## 3. Do they “redirect” to DB using hashing?
+## Why Is This Useful?
 
-Not exactly “redirect”, but yes — they decide where to send the request.
+Imagine your application keeps some data **in memory** on each server:
 
-This is the correct flow:
+```text
+S1 → User A's session
+S2 → User B's session
+S3 → User C's session
+```
 
-1. Request hits App Server  
-2. App Server computes:  
-   hash(userId or key)  
-3. Hashing tells which DB shard to use  
-4. App Server directly queries that DB shard  
+If User A's next request goes to S2:
 
-So it’s not redirecting like a proxy.  
-It is selecting the correct database node and calling it.
+```text
+User A → S2
+           ↓
+     "I don't have A's session"
+```
+
+That creates a problem.
+
+With consistent hashing:
+
+```text
+User A → S1
+User A → S1
+User A → S1
+```
+
+The requests tend to stay on the same server.
+
+This is called **session affinity / sticky sessions**.
 
 ---
 
-## 4. Where consistent hashing is used
+## Why Specifically "Consistent" Hashing?
 
-It is used when you have multiple DB/cache nodes:
+Suppose you have:
 
-DB Shard 1  
-DB Shard 2  
-DB Shard 3  
-DB Shard 4  
+```text
+S1
+S2
+S3
+```
 
-Mapping:
+and User A maps to S1.
 
-user123 → Shard 3  
-user456 → Shard 1  
-user789 → Shard 4  
+Now you add S4.
 
-This mapping is done using consistent hashing (or similar partitioning logic).
+With ordinary hashing:
+
+```text
+hash(user) % 3
+```
+
+changing to:
+
+```text
+hash(user) % 4
+```
+
+can cause **many users to get mapped to different servers**.
+
+With consistent hashing, adding S4 causes only a relatively small portion of keys to move.
+
+```text
+Before:
+
+       S1
+   ↗       ↘
+ S3         S2
+
+
+After adding S4:
+
+       S1
+   ↗       ↘
+ S3        S4
+   ↖       ↙
+       S2
+```
+
+Only some keys need to move.
+
+---
+
+## Interview Answer
+
+> **"Yes, a load balancer can use consistent hashing when we want requests associated with the same key, such as user ID or session ID, to consistently reach the same backend server. It is particularly useful for session affinity and distributed caching. However, for general stateless services, simpler algorithms like Round Robin or Least Connections are often sufficient."**
+
+### Important Distinction
+
+Don't confuse:
+
+**Load balancing**
+
+with
+
+**Consistent hashing**
+
+Consistent hashing is primarily a **mapping strategy**:
+
+```text
+key → server
+```
+
+A load balancer can use that strategy to decide **which backend should receive the request**.
+
+```text
+                 Load Balancer
+                       │
+             Consistent Hashing
+                       │
+          ┌────────────┼────────────┐
+          ↓            ↓            ↓
+         S1           S2           S3
+```
+
+**Round Robin:**
+"Give the next request to the next server."
+
+**Consistent Hashing:**
+"Given this key, consistently choose the corresponding server."
