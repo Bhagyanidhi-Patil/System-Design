@@ -226,6 +226,180 @@ Examples:
 
 The database can be restored after a catastrophic failure.
 
+
+## Database Primary and Replicas Across AZs
+
+You have **one primary DB** and **one or more replicas**, and they are placed across different AZs.
+
+```text
+                     Region
+            ┌──────────┼──────────┐
+            ↓          ↓          ↓
+          AZ-1       AZ-2       AZ-3
+            │          │          │
+        Primary DB   Replica    Replica
+            │          ↑          ↑
+            └──────────┴──────────┘
+                 Replication
+```
+
+So **NOT**:
+
+```text
+❌ AZ-1 → Primary + Replica
+   AZ-2 → Primary + Replica
+   AZ-3 → Primary + Replica
+```
+
+You don't normally have three independent primaries just because you have three AZs.
+
+---
+
+## Why Put Them in Different AZs?
+
+Suppose:
+
+```text
+AZ-1 → Primary DB
+AZ-2 → Replica DB
+AZ-3 → Replica DB
+```
+
+Normally:
+
+```text
+                     Application
+                          |
+                          ↓
+                     Primary DB
+                          |
+                 ┌────────┴────────┐
+                 ↓                 ↓
+             Replica 1          Replica 2
+              (AZ-2)             (AZ-3)
+```
+
+If **AZ-1 fails**:
+
+```text
+AZ-1 → ❌ Primary DB
+AZ-2 → ✅ Replica
+AZ-3 → ✅ Replica
+```
+
+One replica can be promoted to become the new primary:
+
+```text
+AZ-2 → NEW PRIMARY
+AZ-3 → Replica
+```
+
+This gives you **high availability**.
+
+---
+
+## Important Distinction
+
+There are different database architectures.
+
+### Traditional Primary-Replica
+
+```text
+AZ-1                AZ-2                AZ-3
+
+Primary  ───────→  Replica 1
+    │
+    └────────────→  Replica 2
+```
+
+**One primary handles writes.**
+
+**Replicas maintain copies and can handle reads.**
+
+---
+
+### Multi-Primary / Distributed Databases
+
+Some database technologies support multiple nodes that can accept writes:
+
+```text
+AZ-1          AZ-2          AZ-3
+  │             │             │
+  DB  ←──────→  DB  ←──────→  DB
+  ↑             ↑             ↑
+  └──── All can potentially accept writes ────┘
+```
+
+That's a **different architecture** and has additional consistency/conflict considerations.
+
+---
+## Database Cluster vs Availability Zone
+
+**A database cluster does NOT necessarily mean all its nodes are in the same AZ.**
+
+A **cluster** is a logical grouping of database instances/nodes that work together. Those nodes can be distributed across multiple AZs.
+
+For example:
+
+```text
+                     DB CLUSTER
+                         │
+            ┌────────────┼────────────┐
+            ↓            ↓            ↓
+          AZ-1         AZ-2         AZ-3
+            │            │            │
+        Primary DB    Replica 1    Replica 2
+```
+
+Here, all three databases belong to **one cluster**, but they are in **different AZs**.
+
+---
+
+## But a Cluster CAN Also Be Within One AZ
+
+For example:
+
+```text
+AZ-1
+│
+└── DB Cluster
+     ├── Primary
+     └── Replica
+```
+
+Whether nodes are spread across AZs depends on the **database technology and how it is configured**.
+
+`Usually, if one database node goes down, a replica/node within the same cluster takes over. It is not necessarily another cluster taking over.`
+
+You **can** have multiple clusters, for example:
+
+```text
+Cluster A
+├── Primary
+├── Replica
+└── Replica
+
+Cluster B
+├── Primary
+├── Replica
+└── Replica
+```
+
+You might configure **Cluster B as a standby/disaster-recovery cluster**.
+
+If the entire Cluster A becomes unavailable:
+
+```text
+Cluster A → ❌ DOWN
+
+        ↓
+
+Cluster B → ✅ Takes over
+```
+
+But this is generally a **disaster-recovery setup**, not the normal meaning of database replication.
+
+
 ---
 
 # Scenario 4: Database Overload
