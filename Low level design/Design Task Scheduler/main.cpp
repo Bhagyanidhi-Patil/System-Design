@@ -26,7 +26,7 @@ public:
 class Schedule{
 public:
     chrono::steady_clock::time_point nextRun;
-    chrono::milliseconds interval;
+    chrono::seconds interval;
     bool recurring;
 
     Schedule(int delaySec,bool recurring = false,int intervalSec = 0){
