@@ -38,14 +38,14 @@ public:
 
 class ScheduledTask{
 public:
-    shared_ptr<Task>task;
+    Task* task;
     Schedule schedule;
 
-    ScheduledTask(shared_ptr<Task> t,Schedule s):task(t),schedule(s){}
+    ScheduledTask(Task *t,Schedule s):task(t),schedule(s){}
 };
 
 struct Compare{
-    bool operator()(ScheduledTask &a,ScheduledTask &b){
+    bool operator()(const ScheduledTask &a,const ScheduledTask &b){
         return a.schedule.nextRun>b.schedule.nextRun;
     }
 };
@@ -106,10 +106,12 @@ private:
 int main(){
     Scheduler scheduler;
     scheduler.start();
-
-    scheduler.addTask({make_shared<PrintTask>("Task 1"),Schedule(2)});
-    scheduler.addTask({make_shared<PrintTask>("Task 2"),Schedule(5)});
-    scheduler.addTask({make_shared<PrintTask>("Recurring"),Schedule(1,true,3)});
+    PrintTask t1("Task 1");
+    PrintTask t2("Task 2");
+    PrintTask t3("Recurring");
+    scheduler.addTask({&t1,Schedule(2)});
+    scheduler.addTask({&t2,Schedule(5)});
+    scheduler.addTask({&t3,Schedule(1,true,3)});
 
     this_thread::sleep_for(chrono::seconds(12));
     scheduler.stop();
