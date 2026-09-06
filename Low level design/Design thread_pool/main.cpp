@@ -40,8 +40,7 @@ public:
         }
     }
 
-    template<typename F>
-    void submit(F task){
+    void submit(function<void()>task){
         {
             lock_guard<mutex> lock(mtx);
             tasks.emplace(task);
