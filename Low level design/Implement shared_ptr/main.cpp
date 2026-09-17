@@ -39,6 +39,24 @@ public:
              << *refcount << endl;
     }
 
+    // Copy assignment
+    sharedPtr& operator=(const sharedPtr& other) {
+        if (this != &other) {
+            (*refcount)--;
+
+            if (*refcount == 0) {
+                delete ptr;
+                delete refcount;
+            }
+
+            ptr = other.ptr;
+            refcount = other.refcount;
+            (*refcount)++;
+        }
+
+        return *this;
+    }
+
     // Destructor
     ~sharedPtr() {
         (*refcount)--;
@@ -56,16 +74,14 @@ public:
 };
 
 int main() {
-
     sharedPtr p1(new A());
 
     {
-        sharedPtr p2 = p1;
+        sharedPtr p2 = p1;   // Copy constructor
+        sharedPtr p3(new A());
 
-        cout << "Inside scope\n";
+        p3 = p1;             // Copy assignment
     }
-
-    cout << "p2 destroyed, back in main\n";
 
     return 0;
 }
@@ -137,6 +153,68 @@ p2.refcount ──┘
 
 Now both p1 and p2 see the same reference count.
 
+----
+Copy constructor = creating a new object from an existing object
+Copy assignment = assigning to an object that already exists
 
+1. Copy constructor
 
+p1 ─────► A
+          ↑
+          │
+p2 ───────┘
+
+refCount = 2
+
+2. Copy assignment
+
+SharedPtr p1(new A());
+SharedPtr p2(new A());
+
+p2 = p1;
+
+Here, p2 already exists.
+We're replacing what p2 currently owns with what p1 owns.
+
+So this calls:
+SharedPtr& operator=(const SharedPtr& other)
+
+First, p2 must release its existing object:
+
+Before:
+
+p1 ─────► A       count = 1
+
+p2 ─────► B       count = 1
+
+After:
+
+B → deleted
+
+p1 ──┐
+     ├────► A     count = 2
+p2 ──┘
+
+Simple summary
+
+For:
+p2 = p1;
+this → p2
+other → p1
+
+Then:
+Decrease p2's current reference count
+
+(*refCount)--;
+
+If p2 was the last owner (count == 0):
+    delete ptr;
+    delete refCount;
+
+Make p2 point to the same object as p1
+ptr = other.ptr;
+refCount = other.refCount;
+
+Increase the shared reference count because p2 is now also an owner:
+(*refCount)++;
 */
