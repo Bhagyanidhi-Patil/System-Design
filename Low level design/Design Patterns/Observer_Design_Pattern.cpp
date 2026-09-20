@@ -59,6 +59,7 @@ using namespace std;
 class Observer{
 public:
     virtual void update(int temperature)=0;
+    virtual ~Observer() = default;
 };
 //Concrete Observers
 class PhoneDisplay:public Observer{
@@ -97,16 +98,27 @@ public:
 
 int main() {
     WeatherStation station;
-    // PhoneDisplay phone;
-    // TVDisplay tv;
+    PhoneDisplay phone;
+    TVDisplay tv;
     
-    station.addObservers(new PhoneDisplay()); 
-    station.addObservers(new TVDisplay());
-    //station.addObservers(&phone); 
-    //station.addObservers(&tv);
+    station.addObservers(&phone); 
+    station.addObservers(&tv);
     station.setTemperature(25);
     station.setTemperature(30);
     
     return 0;
 }
 
+/*
+If we use a base-class pointer to point to a derived-class object, and we might delete that object using the base pointer, 
+the base class should have a virtual destructor.
+
+Example:
+Observer* obs = new PhoneDisplay();
+delete obs;
+
+Since obs is an Observer* but actually points to a PhoneDisplay, we need:
+virtual ~Observer() = default;
+
+This ensures the PhoneDisplay destructor runs first, followed by the Observer destructor.
+*/
