@@ -144,6 +144,18 @@ int main(){
 }
 
 /*
+TC :
+insert(x)    → O(1)
+remove(x)    → O(1)
+contains(x)  → O(1)
+clear()      → O(1)
+iterate()    → O(N)
+
+SC:
+O(N)
+*/
+
+/*
 What if values are not 0 ... N-1?
 
 Our direct-array approach works only when the key range is known.
