@@ -26,6 +26,7 @@ using namespace std;
 class UnorderedMap{
 private:
     vector<list<pair<int,int>>>table;
+    //list<pair<int,int>>table[size];
     int capacity;
 
     int hash(int key){
@@ -62,11 +63,10 @@ public:
     //function to remove the key
     void remove(int key){
         int index = hash(key);
-        auto &bucket = table[index];
 
-        for(auto it=bucket.begin();it!=bucket.end();++it){
+        for(auto it=table[index].begin();it!=table[index].end();++it){
             if(it->first == key){
-                bucket.erase(it);  //remove the key-value pair from bucket
+                table[index].erase(it);  //remove the key-value pair from bucket
                 return;
             }
         }
