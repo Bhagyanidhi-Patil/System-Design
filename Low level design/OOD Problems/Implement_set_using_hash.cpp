@@ -3,8 +3,8 @@ A Set is a data structure that stores a collection of unique elements in sorted 
 An unordered_set stores unique elements but does not maintain sorted order.
 
 If the values are restricted to 0...N-1, I can use a direct-address array. 
-If the values are arbitrary and the range is large or unknown, 
-I would use a hash table for average O(1) operations. 
+If the values are arbitrary and the range is large or unknown, I would use a hash table for average O(1) operations. 
+Even if values are restricted 0...N-1 and value of N is too large then hash table is good option.
 If ordered iteration is required, I would use a balanced BST.
 */
 #include <iostream>
