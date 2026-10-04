@@ -1,8 +1,26 @@
 /*
 Problem statement:
 Given a system that has one event and multiple listeners, design and implement a mechanism for the listeners to hear about the event. 
-We want to implement a callback mechanism that allows listeners to register.  
-A function where are Callbacks registered before the event are executed when the event fires.
+We want to implement a callback mechanism that allows listeners to register.A function where are Callbacks registered before the event are executed when the event fires.
+
+register cb1
+register cb2
+
+event_fired()
+→ cb1()
+→ cb2()
+
+register cb3
+
+event_fired()
+→ cb1()
+→ cb2()
+→ cb3()
+
+event_fired()
+→ cb1()
+→ cb2()
+→ cb3()
 
 Solution:
 This is a classic observer / publish–subscribe pattern problem.
@@ -15,7 +33,7 @@ event_fired → iterates over all callbacks and invokes them.
 
 --------------------------
 
-A callback is a function that you give to another function/system, so that it can call your function later when something happens.
+A callback is a function passed to another function or system, so that it can be called later when a specific event or condition occurs.
 
 Think of it as: "When this event happens, call this function."
 
