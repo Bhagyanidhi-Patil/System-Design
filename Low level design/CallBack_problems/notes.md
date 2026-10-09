@@ -455,3 +455,67 @@ event_fired()
 → cb2()
 ```
 
+---
+
+## What if registration and event firing happen at the same time?
+
+If `event_fired()` and `register_callback()` access the shared callback list without synchronization, the program can have a data race. Protect access to the list with a mutex, and take a snapshot while holding the lock.
+
+```cpp
+vector<function<void()>> callbacks;
+mutex mtx;
+```
+
+Assume `event_fired()` swaps the registered callbacks into a local snapshot while holding `mtx`. It then releases the mutex before executing the callbacks.
+
+### Case 1: `event_fired()` acquires the lock first
+
+```text
+T1: event_fired()
+        ↓
+    lock mtx
+        ↓
+    swap callbacks into a local snapshot
+        ↓
+    unlock mtx
+        ↓
+    execute the snapshot
+
+T2: register_callback(newCallback)
+        ↓
+    lock mtx
+        ↓
+    add newCallback to callbacks
+        ↓
+    unlock mtx
+```
+
+The newly registered callback is not in the snapshot already being executed. It remains in `callbacks` for a future event firing.
+
+### Case 2: `register_callback()` acquires the lock first
+
+```text
+T2: register_callback(newCallback)
+        ↓
+    lock mtx
+        ↓
+    add newCallback to callbacks
+        ↓
+    unlock mtx
+
+T1: event_fired()
+        ↓
+    lock mtx
+        ↓
+    swap callbacks into a local snapshot
+        ↓
+    unlock mtx
+        ↓
+    execute the snapshot
+```
+
+In this case, `newCallback` is included in the snapshot and runs during this event firing.
+
+### Key idea: the synchronization point
+
+The mutex makes the ordering unambiguous. The callback is included in the event if registration completes before `event_fired()` takes its snapshot. If the snapshot is taken first, the callback is left for a future event. Callbacks should be executed after releasing the mutex so user callback code does not run while the callback list is locked.
