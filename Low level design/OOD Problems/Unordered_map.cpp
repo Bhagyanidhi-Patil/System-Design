@@ -60,11 +60,17 @@ public:
         return -1;
     }
 
-    //function to clear all key valuse
+    //function to clear all key value - O(N)
     void clear(){
         for(int i=0;i<capacity;i++){
             table[i].clear();
         }
+    }
+
+    //function to clear all key value - O(1) , table.clear() removes all buckets too, so you must recreate them before using the map again.
+    void clear() {
+        table.clear();
+        table.resize(capacity);
     }
 
 
