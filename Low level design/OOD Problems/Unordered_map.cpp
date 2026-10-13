@@ -60,6 +60,14 @@ public:
         return -1;
     }
 
+    //function to clear all key valuse
+    void clear(){
+        for(int i=0;i<capacity;i++){
+            table[i].clear();
+        }
+    }
+
+
     //function to remove the key
     void remove(int key){
         int index = hash(key);
