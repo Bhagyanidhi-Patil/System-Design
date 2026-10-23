@@ -3,8 +3,10 @@
 #include <unordered_map>
 #include <stdexcept>
 #include <mutex>
+#include <vector>
 using namespace std;
 
+// Common interface for all storage tiers
 class StorageTier {
 public:
     virtual int get(int key) = 0;
@@ -37,13 +39,13 @@ private:
     void insertToFront(Node* node) {
         node->next = head->next;
         node->prev = head;
-        node->next->prev = node;
+        head->next->prev = node;
         head->next = node;
     }
 
 public:
-    LRUCache(int cap) : capacity(cap) {
-        if (capacity == 0)
+    explicit LRUCache(int cap) : capacity(cap) {
+        if (cap <= 0)
             throw invalid_argument("Capacity must be > 0");
 
         head = new Node(0, 0);
@@ -56,7 +58,7 @@ public:
     LRUCache(const LRUCache&) = delete;
     LRUCache& operator=(const LRUCache&) = delete;
 
-    ~LRUCache() {
+    ~LRUCache() override {
         Node* curr = head;
 
         while (curr) {
@@ -66,6 +68,7 @@ public:
         }
     }
 
+    // Called through MultiTierCache's mutex
     int get(int key) override {
         auto it = cache.find(key);
 
@@ -117,27 +120,28 @@ public:
 
 class MultiTierCache {
 private:
-    StorageTier* tiers[3];
-    int tierCount = 0;
-    mutex mtx;  // Protects all manager operations
+    vector<StorageTier*> tiers;  // Fastest to slowest
+    mutable mutex mtx;
 
 public:
+    // Registers a tier. The cache does not own the tier object.
     void addTier(StorageTier* tier) {
-        lock_guard<mutex> lock(mtx);
+        if (tier == nullptr)
+            throw invalid_argument("Tier cannot be null");
 
-        if (tierCount < 3)
-            tiers[tierCount++] = tier;
+        lock_guard<mutex> lock(mtx);
+        tiers.push_back(tier);
     }
 
     int get(int key) {
         lock_guard<mutex> lock(mtx);
 
-        for (int i = 0; i < tierCount; i++) {
+        for (size_t i = 0; i < tiers.size(); i++) {
             int value = tiers[i]->get(key);
 
             if (value != -1) {
-                // Promote to faster tiers
-                for (int j = 0; j < i; j++)
+                // Promote the value to all faster tiers
+                for (size_t j = 0; j < i; j++)
                     tiers[j]->put(key, value);
 
                 return value;
@@ -150,15 +154,17 @@ public:
     void put(int key, int value) {
         lock_guard<mutex> lock(mtx);
 
-        for (int i = 0; i < tierCount; i++)
-            tiers[i]->put(key, value);
+        // Write-through: write to every tier
+        for (StorageTier* tier : tiers)
+            tier->put(key, value);
     }
 
     void erase(int key) {
         lock_guard<mutex> lock(mtx);
 
-        for (int i = 0; i < tierCount; i++)
-            tiers[i]->erase(key);
+        // Delete from every tier
+        for (StorageTier* tier : tiers)
+            tier->erase(key);
     }
 };
 
@@ -178,6 +184,8 @@ int main() {
     cache.put(3, 300);
 
     cout << cache.get(1) << endl;  // 100
+    cout << cache.get(2) << endl;  // 200
+    cout << cache.get(4) << endl;  // -1
 
     cache.put(1, 500);
     cout << cache.get(1) << endl;  // 500
