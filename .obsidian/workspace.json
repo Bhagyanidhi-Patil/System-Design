@@ -27,13 +27,14 @@
             "state": {
               "type": "excalidraw",
               "state": {
-                "file": "Excalidraw/Drawing 2026-10-27 21.51.23.excalidraw.md"
+                "file": "Low level design/LRU cache/Drawing 2026-10-27 21.51.23.excalidraw.md"
               },
               "icon": "excalidraw-icon",
               "title": "Drawing 2026-10-27 21.51.23.excalidraw"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -95,8 +96,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300,
-    "collapsed": true
+    "width": 300
   },
   "right": {
     "id": "af0d432819791681",
@@ -112,7 +112,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Low level design/LRU cache/UML.md",
+                "file": "Low level design/LRU cache/Drawing 2026-10-27 21.51.23.excalidraw.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -131,7 +131,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Low level design/LRU cache/UML.md",
+                "file": "Low level design/LRU cache/Drawing 2026-10-27 21.51.23.excalidraw.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
@@ -174,7 +174,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Low level design/LRU cache/UML.md",
+                "file": "Low level design/LRU cache/Drawing 2026-10-27 21.51.23.excalidraw.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -203,10 +203,10 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "6dc8cb9caace52ba",
+  "active": "79fe6e31ae9a0571",
   "lastOpenFiles": [
-    "Excalidraw/Drawing 2026-10-27 21.51.23.excalidraw.md",
     "Low level design/LRU cache/UML.md",
+    "Low level design/LRU cache/Drawing 2026-10-27 21.51.23.excalidraw.md",
     "Excalidraw",
     "Low level design/Design filesystem/Untitled.md",
     "Low level design/Design filesystem/requirements.md",
