@@ -11,30 +11,13 @@
             "id": "6dc8cb9caace52ba",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Low level design/LRU cache/UML.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "UML"
-            }
-          },
-          {
-            "id": "feee92cde6e86a4c",
-            "type": "leaf",
-            "state": {
-              "type": "excalidraw",
-              "state": {
-                "file": "Low level design/LRU cache/Drawing 2026-10-27 21.51.23.excalidraw.md"
-              },
-              "icon": "excalidraw-icon",
-              "title": "Drawing 2026-10-27 21.51.23.excalidraw"
+              "title": "New tab"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -112,7 +95,6 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Low level design/LRU cache/Drawing 2026-10-27 21.51.23.excalidraw.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -131,7 +113,6 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Low level design/LRU cache/Drawing 2026-10-27 21.51.23.excalidraw.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
@@ -174,7 +155,6 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Low level design/LRU cache/Drawing 2026-10-27 21.51.23.excalidraw.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -203,11 +183,11 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "feee92cde6e86a4c",
+  "active": "6dc8cb9caace52ba",
   "lastOpenFiles": [
+    "Low level design/LRU cache/Drawing 2026-10-27 21.51.23.excalidraw.md",
     "Low level design/LRU cache/Drawing 2026-10-27 21.51.23.excalidraw.png",
     "Low level design/LRU cache/UML.md",
-    "Low level design/LRU cache/Drawing 2026-10-27 21.51.23.excalidraw.md",
     "Excalidraw",
     "Low level design/Design filesystem/Untitled.md",
     "Low level design/Design filesystem/requirements.md",
