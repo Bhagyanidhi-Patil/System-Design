@@ -11,10 +11,12 @@
             "id": "6dc8cb9caace52ba",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
-              "icon": "lucide-file",
-              "title": "New tab"
+              "type": "image",
+              "state": {
+                "file": "Low level design/Design filesystem/UML.png"
+              },
+              "icon": "lucide-image",
+              "title": "UML"
             }
           }
         ]
@@ -95,6 +97,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "Low level design/Design filesystem/UML.png",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -113,6 +116,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "Low level design/Design filesystem/UML.png",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
@@ -155,6 +159,7 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "Low level design/Design filesystem/UML.png",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -183,8 +188,10 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "79fe6e31ae9a0571",
+  "active": "6dc8cb9caace52ba",
   "lastOpenFiles": [
+    "Excalidraw/Drawing 2026-10-27 22.32.05.excalidraw.md",
+    "Low level design/Design filesystem/UML.png",
     "Low level design/LRU cache/Drawing 2026-10-27 21.51.23.excalidraw.md",
     "Low level design/LRU cache/UML.png",
     "Low level design/LRU cache/UML.md",
