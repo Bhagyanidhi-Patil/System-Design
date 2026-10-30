@@ -4,19 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "f46e1298f20da6a8",
+        "id": "a37550246c8f857b",
         "type": "tabs",
         "children": [
           {
-            "id": "6dc8cb9caace52ba",
+            "id": "591ed07ff4b71697",
             "type": "leaf",
             "state": {
-              "type": "image",
-              "state": {
-                "file": "Low level design/Design filesystem/UML.png"
-              },
-              "icon": "lucide-image",
-              "title": "UML"
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
             }
           }
         ]
@@ -97,7 +95,6 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Low level design/Design filesystem/UML.png",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -116,7 +113,6 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Low level design/Design filesystem/UML.png",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
@@ -159,7 +155,6 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Low level design/Design filesystem/UML.png",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -188,10 +183,20 @@
       "obsidian-git:Open Git source control": false
     }
   },
-  "active": "6dc8cb9caace52ba",
+  "active": "591ed07ff4b71697",
   "lastOpenFiles": [
-    "Excalidraw/Drawing 2026-10-27 22.32.05.excalidraw.md",
+    "Low level design/Design Notification system/UML - factory+strategy.png",
+    "Low level design/Design Notification system/UML - factory+strategy.md",
+    "Low level design/Design Notification system/UML - factory+observer.png",
+    "Low level design/Design Notification system/Drawing 2026-10-30 17.08.12.excalidraw.md",
+    "Low level design/Design Notification system/UML - factory+observer.md",
+    "Low level design/Design filesystem/UML - factory+observer.png",
+    "Untitled.canvas",
+    "High level design/advanced_system_thinking/How_redis_handle_concurrency/how_redis_handle_concurrency.md",
+    "Low level design/CallBack_problems/notes.md",
+    "High level design/system_design_problems/design-paste-bin/design-pastebin.md",
     "Low level design/Design filesystem/UML.png",
+    "Excalidraw/Drawing 2026-10-27 22.32.05.excalidraw.md",
     "Low level design/LRU cache/Drawing 2026-10-27 21.51.23.excalidraw.md",
     "Low level design/LRU cache/UML.png",
     "Low level design/LRU cache/UML.md",
