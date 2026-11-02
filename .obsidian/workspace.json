@@ -11,10 +11,14 @@
             "id": "591ed07ff4b71697",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "Low level design/Design thread_pool/Questions.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "Questions"
             }
           }
         ]
@@ -79,7 +83,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 300,
+    "collapsed": true
   },
   "right": {
     "id": "af0d432819791681",
@@ -95,6 +100,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "Low level design/Design thread_pool/Questions.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -113,6 +119,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "Low level design/Design thread_pool/Questions.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
@@ -155,6 +162,7 @@
             "state": {
               "type": "outline",
               "state": {
+                "file": "Low level design/Design thread_pool/Questions.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -185,6 +193,9 @@
   },
   "active": "591ed07ff4b71697",
   "lastOpenFiles": [
+    "Low level design/Design thread_pool/Questions.md",
+    "Low level design/Design thread_pool/questions.md",
+    "Low level design/LRU cache/LRU_thread_Safe.cpp",
     "Low level design/Design Notification system/UML - factory+strategy.png",
     "Low level design/Design Notification system/UML - factory+strategy.md",
     "Low level design/Design Notification system/UML - factory+observer.png",
