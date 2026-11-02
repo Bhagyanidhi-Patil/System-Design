@@ -12,6 +12,28 @@
 
 ---
 
+#### Why do we need a thread pool ?
+
+A Thread Pool is used to efficiently manage and reuse a fixed number of threads to execute multiple tasks concurrently.
+
+`Problem: Creating a new thread for every task`
+- Suppose your application receives 10,000 tasks and if we create a new thread for every task.
+#### What problems can occur?
+1. Thread creation overhead: Creating and destroying threads consumes time and system resources.
+2. Memory consumption: Every thread requires its own stack memory and other resources.
+3. Context switching: Too many threads can cause excessive context switching, reducing performance.
+4. Resource exhaustion: Creating thousands of threads can exhaust system resources.
+So, creating a new thread for every task is not efficient.
+
+`Solution: Thread Pool`
+- Instead of creating a new thread for every task, we create a fixed number of worker threads and reuse them.
+
+`With a thread pool:`
+- A fixed number of worker threads are created.
+- Incoming requests are placed in a task queue.
+- Available workers pick up requests and execute them.
+- When a worker finishes, it takes another request.
+---
 #### High Level Design
 ```
                  submit(task)
