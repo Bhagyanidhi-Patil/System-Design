@@ -8,7 +8,7 @@ using namespace std;
 class RateLimiter{
 public:
     virtual bool allowRequest(const string &userId)=0;
-    ~RateLimiter(){}
+    ~RateLimiter()=default;
 };
 
 class SlidingWindowRateLimiter:public RateLimiter{
