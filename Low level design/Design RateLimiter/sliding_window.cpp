@@ -36,10 +36,7 @@ public:
 
         while (!m[userId].empty())
         {
-            auto elapsed = chrono::duration_cast<chrono::seconds>(
-                now - m[userId].front());
-
-            if (elapsed >= windowSize)
+            if (now - m[userId].front() >= windowSize)
                 m[userId].pop();
             else
                 break;
