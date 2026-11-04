@@ -52,6 +52,22 @@ public:
         if (elapsed > 0) {
             lastRefill += chrono::seconds(elapsed);
         }
+        /*
+        Example
+        Suppose:
+        - lastRefill = 10:00:00
+        - now = 10:00:05.7
+        - elapsed = 5 seconds (because duration_cast truncates fractional seconds).
+        Your code executes:
+        lastRefill += chrono::seconds(5);
+
+
+        So:
+        - New lastRefill = 10:00:05
+        - now = 10:00:05.7
+        The remaining 0.7 seconds are preserved for the next refill calculation.
+        */
+
 
         // Consume token
         if (currTokens > 0) {
