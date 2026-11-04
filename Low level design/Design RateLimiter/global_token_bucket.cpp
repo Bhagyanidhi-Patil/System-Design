@@ -44,6 +44,9 @@ public:
             capacity,
             currTokens + static_cast<int>(elapsed * refillRate)
         );
+        //We use static_cast<int>() because we want to convert the calculated refill amount into an integer.
+        //static_cast<int>() truncates the decimal portion.
+
 
         // Move refill time forward
         if (elapsed > 0) {
