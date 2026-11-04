@@ -51,9 +51,7 @@ public:
 
         userInfo &user = m[userId];
 
-        auto elapsed = chrono::duration_cast<chrono::seconds>(now - user.windowStart);
-
-        if (elapsed >= windowSize)
+        if (now - user.windowStart >= windowSize)
         {
             user.windowStart = now;
             user.requestCount = 1;   // Current request is counted
@@ -86,6 +84,17 @@ int main()
 
     return 0;
 }
+
+/*
+The main difference is what we store in userInfo.
+- Fixed Window: Stores requestCount and windowStart.
+- Sliding Window: Stores a queue of request timestamps for each user.
+
+    Why do we need to change userInfo?
+In a fixed window, we only need to know how many requests a user has made in the current window.
+
+In a sliding window, we need to know when each request was made, so that we can remove expired requests individually.
+*/
 
 /*
 For global request implmentation (insated of limiting per user):
